@@ -95,10 +95,11 @@ Plans:
   1. Tool is available as a Docker container image that mounts the Docker socket and config directory, running as a non-root user
   2. Tool is available as a standalone Go binary for linux/amd64, linux/arm64, darwin/amd64, and darwin/arm64 via goreleaser
   3. A new user can go from download to first `rotator scan` in under 5 minutes following the provided example config
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — Docker container image, version injection, non-root user
+- [ ] 05-02-PLAN.md — Goreleaser cross-compilation config and Makefile
 
 ## Progress
 
@@ -111,4 +112,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Discovery and Crypto | 2/2 | Complete    | 2026-03-28 |
 | 3. Rotation Engine | 2/3 | Complete    | 2026-03-28 |
 | 4. Scheduling and Operations | 0/3 | Complete    | 2026-03-28 |
-| 5. Distribution | 0/? | Not started | - |
+| 5. Distribution | 0/2 | Not started | - |
