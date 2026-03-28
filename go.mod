@@ -1,6 +1,6 @@
 module github.com/giulio/secret-rotator
 
-go 1.24.3
+go 1.25.0
 
 require (
 	github.com/compose-spec/compose-go/v2 v2.10.1
