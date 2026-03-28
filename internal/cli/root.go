@@ -43,6 +43,7 @@ containers in dependency order.`,
 	rootCmd.AddCommand(NewRotateCmd())
 	rootCmd.AddCommand(NewStatusCmd())
 	rootCmd.AddCommand(NewHistoryCmd())
+	rootCmd.AddCommand(NewDaemonCmd())
 
 	return rootCmd
 }
