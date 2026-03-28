@@ -10,13 +10,13 @@
 - [ ] **DISC-01**: Tool auto-scans `.env` files and identifies secrets by naming patterns (MYSQL_PASSWORD, REDIS_PASSWORD, JWT_SECRET, etc.)
 - [ ] **DISC-02**: Tool audits password strength and flags weak, default, or short passwords
 - [x] **DISC-03**: Tool works zero-config without `rotator.yml`, scanning the current directory
-- [ ] **DISC-04**: Tool supports multi-file `.env` setups (`.env`, `.env.local`, `docker-compose.override.yml`)
+- [x] **DISC-04**: Tool supports multi-file `.env` setups (`.env`, `.env.local`, `docker-compose.override.yml`)
 
 ### Rotation
 
 - [ ] **ROT-01**: User can manually rotate a specific secret via `rotator rotate SECRET_NAME`
 - [ ] **ROT-02**: Tool supports scheduled rotation via cron expressions in config or Docker labels
-- [ ] **ROT-03**: Tool writes `.env` files atomically (temp file + rename) to prevent corruption
+- [x] **ROT-03**: Tool writes `.env` files atomically (temp file + rename) to prevent corruption
 - [ ] **ROT-04**: Tool automatically rolls back if rotation fails (restores old secret, restarts containers)
 
 ### Providers
@@ -83,10 +83,10 @@
 | DISC-01 | Phase 2 | Pending |
 | DISC-02 | Phase 2 | Pending |
 | DISC-03 | Phase 1 | Complete |
-| DISC-04 | Phase 1 | Pending |
+| DISC-04 | Phase 1 | Complete |
 | ROT-01 | Phase 3 | Pending |
 | ROT-02 | Phase 4 | Pending |
-| ROT-03 | Phase 1 | Pending |
+| ROT-03 | Phase 1 | Complete |
 | ROT-04 | Phase 3 | Pending |
 | PROV-01 | Phase 3 | Pending |
 | PROV-02 | Phase 3 | Pending |
