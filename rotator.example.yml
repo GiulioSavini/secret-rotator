@@ -1,0 +1,54 @@
+# Rotator configuration example
+# Copy to rotator.yml and customize for your environment.
+
+# Environment variable containing the master encryption key (optional).
+# Used to encrypt secret history entries at rest.
+master_key_env: ROTATOR_MASTER_KEY
+
+# Secret definitions
+secrets:
+  # MySQL root password rotation
+  - name: mysql_root_password
+    type: mysql
+    env_key: MYSQL_ROOT_PASSWORD
+    env_file: .env
+    containers:
+      - mysql
+      - app
+    provider:
+      host: localhost
+      port: "3306"
+      user: root
+    schedule: "0 3 * * 0"   # Weekly at 3am Sunday
+    length: 32
+
+  # Redis password rotation
+  - name: redis_password
+    type: redis
+    env_key: REDIS_PASSWORD
+    env_file: .env
+    containers:
+      - redis
+      - app
+      - worker
+    provider:
+      host: localhost
+      port: "6379"
+    schedule: "0 4 * * 0"
+    length: 64
+
+  # Generic API key rotation (multi-file)
+  - name: api_secret_key
+    type: generic
+    env_key: SECRET_KEY
+    env_files:
+      - .env
+      - .env.local
+    containers:
+      - app
+    length: 48
+
+# Notification targets (optional)
+notifications:
+  - type: slack
+    url: https://hooks.slack.com/services/xxx/yyy/zzz
