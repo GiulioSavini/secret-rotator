@@ -1,0 +1,112 @@
+# Roadmap: Secret Rotator
+
+## Overview
+
+Secret Rotator goes from zero to a distributable CLI tool in 5 phases. Foundation work (Go project scaffold, config loading, .env file handling, Docker integration) comes first because every subsequent phase depends on it. Discovery and crypto are built next as independently testable vertical slices that prove the scan and history commands before touching rotation logic. The rotation engine and all four providers form the core phase where the product's central value is delivered. Scheduling and operational commands layer on top of working rotation. Distribution packages the result.
+
+## Phases
+
+**Phase Numbering:**
+- Integer phases (1, 2, 3): Planned milestone work
+- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+
+Decimal phases appear between their surrounding integers in numeric order.
+
+- [ ] **Phase 1: Foundation** - Project scaffold, CLI skeleton, config loading, .env file handling, Docker integration
+- [ ] **Phase 2: Discovery and Crypto** - Secret scanning, strength auditing, encrypted secret store, scan and history commands
+- [ ] **Phase 3: Rotation Engine** - Provider system, execution state machine, rollback, all four providers, rotate command
+- [ ] **Phase 4: Scheduling and Operations** - Cron-based scheduling, status command, webhook notifications, Docker label config
+- [ ] **Phase 5: Distribution** - Docker container image, standalone Go binary, goreleaser cross-compilation
+
+## Phase Details
+
+### Phase 1: Foundation
+**Goal**: A working CLI skeleton that can load configuration, read/write .env files atomically, and interact with the Docker daemon for container lifecycle operations
+**Depends on**: Nothing (first phase)
+**Requirements**: DISC-03, DISC-04, DIST-03, INFR-01, ROT-03
+**Success Criteria** (what must be TRUE):
+  1. User can run `rotator --help` and see available commands (scan, rotate, status, history)
+  2. Tool loads and validates a `rotator.yml` configuration file, reporting clear errors for invalid config
+  3. Tool reads `.env` files (including `.env.local` and multi-file setups) preserving comments and formatting
+  4. Tool writes `.env` files atomically via temp-file-plus-rename without corrupting existing content
+  5. Tool can list, inspect, stop, start, and health-check Docker containers, restarting them in dependency order
+**Plans**: TBD
+
+Plans:
+- [ ] 01-01: TBD
+- [ ] 01-02: TBD
+
+### Phase 2: Discovery and Crypto
+**Goal**: Users can scan their environment to discover secrets with strength auditing, and the tool can encrypt and store rotation history
+**Depends on**: Phase 1
+**Requirements**: DISC-01, DISC-02, CLI-01, CLI-04, INFR-02
+**Success Criteria** (what must be TRUE):
+  1. `rotator scan` discovers secrets in .env files by naming patterns and reports their type, associated containers, and strength rating
+  2. `rotator scan` flags weak, default, or short passwords with actionable warnings
+  3. `rotator scan` works zero-config without a `rotator.yml` file present
+  4. `rotator history` displays the encrypted rotation audit log with timestamps and outcomes
+  5. Old secrets are encrypted at rest using AES-256-GCM with Argon2id key derivation from a master passphrase
+**Plans**: TBD
+
+Plans:
+- [ ] 02-01: TBD
+- [ ] 02-02: TBD
+
+### Phase 3: Rotation Engine
+**Goal**: Users can rotate secrets on demand with automatic rollback on failure, using any of the four supported providers
+**Depends on**: Phase 2
+**Requirements**: ROT-01, ROT-04, PROV-01, PROV-02, PROV-03, PROV-04, CLI-02
+**Success Criteria** (what must be TRUE):
+  1. `rotator rotate SECRET_NAME` rotates a specific secret end-to-end (generate, apply to DB, update .env, restart containers)
+  2. Generic provider regenerates a password, updates .env, and restarts affected containers without any database interaction
+  3. MySQL/MariaDB provider executes ALTER USER to rotate the database password and updates all referencing .env files and containers
+  4. PostgreSQL provider executes ALTER ROLE to rotate the database password and updates all referencing .env files and containers
+  5. Redis provider executes CONFIG SET requirepass plus CONFIG REWRITE and restarts all consumers of that password
+  6. If any step in rotation fails, the tool automatically rolls back (restores old secret in DB and .env, restarts containers) leaving the system in its pre-rotation state
+**Plans**: TBD
+
+Plans:
+- [ ] 03-01: TBD
+- [ ] 03-02: TBD
+- [ ] 03-03: TBD
+
+### Phase 4: Scheduling and Operations
+**Goal**: Users can automate rotation on a schedule, check system status, and receive notifications on rotation events
+**Depends on**: Phase 3
+**Requirements**: ROT-02, CLI-03, INFR-03, INFR-04
+**Success Criteria** (what must be TRUE):
+  1. `rotator status` shows each managed secret's current state, age, and next scheduled rotation time
+  2. Tool runs in daemon mode executing scheduled rotations defined by cron expressions in config or Docker labels
+  3. Tool sends webhook notifications (Discord, Slack, generic HTTP) on rotation success and failure
+  4. Tool reads rotation schedule from Docker labels (com.secret-rotator.schedule) as an alternative to YAML config
+**Plans**: TBD
+
+Plans:
+- [ ] 04-01: TBD
+- [ ] 04-02: TBD
+
+### Phase 5: Distribution
+**Goal**: Users can install and run the tool as either a Docker container or a standalone binary on Linux, macOS, and ARM
+**Depends on**: Phase 4
+**Requirements**: DIST-01, DIST-02
+**Success Criteria** (what must be TRUE):
+  1. Tool is available as a Docker container image that mounts the Docker socket and config directory, running as a non-root user
+  2. Tool is available as a standalone Go binary for linux/amd64, linux/arm64, darwin/amd64, and darwin/arm64 via goreleaser
+  3. A new user can go from download to first `rotator scan` in under 5 minutes following the provided example config
+**Plans**: TBD
+
+Plans:
+- [ ] 05-01: TBD
+
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Foundation | 0/? | Not started | - |
+| 2. Discovery and Crypto | 0/? | Not started | - |
+| 3. Rotation Engine | 0/? | Not started | - |
+| 4. Scheduling and Operations | 0/? | Not started | - |
+| 5. Distribution | 0/? | Not started | - |

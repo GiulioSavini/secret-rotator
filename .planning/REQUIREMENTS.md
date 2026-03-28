@@ -80,35 +80,35 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DISC-01 | TBD | Pending |
-| DISC-02 | TBD | Pending |
-| DISC-03 | TBD | Pending |
-| DISC-04 | TBD | Pending |
-| ROT-01 | TBD | Pending |
-| ROT-02 | TBD | Pending |
-| ROT-03 | TBD | Pending |
-| ROT-04 | TBD | Pending |
-| PROV-01 | TBD | Pending |
-| PROV-02 | TBD | Pending |
-| PROV-03 | TBD | Pending |
-| PROV-04 | TBD | Pending |
-| INFR-01 | TBD | Pending |
-| INFR-02 | TBD | Pending |
-| INFR-03 | TBD | Pending |
-| INFR-04 | TBD | Pending |
-| CLI-01 | TBD | Pending |
-| CLI-02 | TBD | Pending |
-| CLI-03 | TBD | Pending |
-| CLI-04 | TBD | Pending |
-| DIST-01 | TBD | Pending |
-| DIST-02 | TBD | Pending |
-| DIST-03 | TBD | Pending |
+| DISC-01 | Phase 2 | Pending |
+| DISC-02 | Phase 2 | Pending |
+| DISC-03 | Phase 1 | Pending |
+| DISC-04 | Phase 1 | Pending |
+| ROT-01 | Phase 3 | Pending |
+| ROT-02 | Phase 4 | Pending |
+| ROT-03 | Phase 1 | Pending |
+| ROT-04 | Phase 3 | Pending |
+| PROV-01 | Phase 3 | Pending |
+| PROV-02 | Phase 3 | Pending |
+| PROV-03 | Phase 3 | Pending |
+| PROV-04 | Phase 3 | Pending |
+| INFR-01 | Phase 1 | Pending |
+| INFR-02 | Phase 2 | Pending |
+| INFR-03 | Phase 4 | Pending |
+| INFR-04 | Phase 4 | Pending |
+| CLI-01 | Phase 2 | Pending |
+| CLI-02 | Phase 3 | Pending |
+| CLI-03 | Phase 4 | Pending |
+| CLI-04 | Phase 2 | Pending |
+| DIST-01 | Phase 5 | Pending |
+| DIST-02 | Phase 5 | Pending |
+| DIST-03 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 23 total
-- Mapped to phases: 0
-- Unmapped: 23
+- Mapped to phases: 23
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-28*
-*Last updated: 2026-03-28 after initial definition*
+*Last updated: 2026-03-27 after roadmap creation*
