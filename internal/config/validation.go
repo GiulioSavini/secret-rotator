@@ -15,7 +15,10 @@ func validate(cfg *Config) error {
 		if s.Name == "" {
 			return fmt.Errorf("secrets[%d]: name is required", i)
 		}
-		if s.Type != "" && !validTypes[s.Type] {
+		if s.Type == "" {
+			return fmt.Errorf("secrets[%d] %q: type is required (valid: mysql, postgres, redis, generic)", i, s.Name)
+		}
+		if !validTypes[s.Type] {
 			return fmt.Errorf("secrets[%d] %q: invalid type %q (valid: mysql, postgres, redis, generic)", i, s.Name, s.Type)
 		}
 		if s.EnvKey == "" {

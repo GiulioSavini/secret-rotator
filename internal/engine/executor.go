@@ -183,13 +183,15 @@ func (e *Engine) recordSuccess(state *RotationState) {
 	if e.history == nil {
 		return
 	}
-	_ = e.history.Append(history.HistoryEntry{
+	if err := e.history.Append(history.HistoryEntry{
 		SecretName: state.SecretName,
 		RotatedAt:  time.Now().UTC(),
 		OldValue:   state.OldSecret,
-		NewHash:    "", // could hash the new secret if needed
+		NewHash:    "",
 		Status:     "success",
-	})
+	}); err != nil {
+		log.Printf("warning: failed to record success history for %s: %v", state.SecretName, err)
+	}
 }
 
 // recordFailure appends a failure entry to the history store.
@@ -197,13 +199,15 @@ func (e *Engine) recordFailure(state *RotationState, originalErr error) {
 	if e.history == nil {
 		return
 	}
-	_ = e.history.Append(history.HistoryEntry{
+	if err := e.history.Append(history.HistoryEntry{
 		SecretName: state.SecretName,
 		RotatedAt:  time.Now().UTC(),
 		OldValue:   state.OldSecret,
 		Status:     "failed",
 		Details:    originalErr.Error(),
-	})
+	}); err != nil {
+		log.Printf("warning: failed to record failure history for %s: %v", state.SecretName, err)
+	}
 }
 
 // resolveEnvFilePaths returns the list of .env file paths from the config.

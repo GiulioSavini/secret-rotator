@@ -48,9 +48,31 @@ func rollback(ctx context.Context, state *RotationState, prov provider.Provider,
 	}
 
 	if len(errs) > 0 {
-		dbState := "new"
-		envState := "new"
+		dbState := "unknown"
+		envState := "unknown"
 		containerState := "not restarted"
+
+		// Determine actual state based on which rollback steps succeeded
+		dbRolledBack := true
+		envRestored := true
+		for _, e := range errs {
+			if strings.Contains(e, "provider rollback") {
+				dbRolledBack = false
+			}
+			if strings.Contains(e, "restore .env") {
+				envRestored = false
+			}
+		}
+		if dbRolledBack && state.CurrentStep >= StepGenerate {
+			dbState = "old (restored)"
+		} else if !dbRolledBack {
+			dbState = "new (rollback failed)"
+		}
+		if envRestored {
+			envState = "old (restored)"
+		} else {
+			envState = "new (restore failed)"
+		}
 		if state.CurrentStep >= StepRestart {
 			containerState = "restarted with unknown state"
 		}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -47,7 +48,9 @@ func (m *MySQLProvider) Rotate(ctx context.Context, cfg ProviderConfig, currentS
 		return nil, fmt.Errorf("mysql: connecting as admin: %w", err)
 	}
 
-	query := fmt.Sprintf("ALTER USER '%s'@'%%' IDENTIFIED BY '%s'", target, newSecret)
+	escapedPass := strings.ReplaceAll(newSecret, "'", "''")
+	escapedTarget := strings.ReplaceAll(target, "'", "''")
+	query := fmt.Sprintf("ALTER USER '%s'@'%%' IDENTIFIED BY '%s'", escapedTarget, escapedPass)
 	if _, err := db.ExecContext(ctx, query); err != nil {
 		return nil, fmt.Errorf("mysql: alter user %s: %w", target, err)
 	}
@@ -91,7 +94,9 @@ func (m *MySQLProvider) Rollback(ctx context.Context, cfg ProviderConfig, oldSec
 		return fmt.Errorf("mysql: rollback connect: %w", err)
 	}
 
-	query := fmt.Sprintf("ALTER USER '%s'@'%%' IDENTIFIED BY '%s'", target, oldSecret)
+	escapedPass := strings.ReplaceAll(oldSecret, "'", "''")
+	escapedTarget := strings.ReplaceAll(target, "'", "''")
+	query := fmt.Sprintf("ALTER USER '%s'@'%%' IDENTIFIED BY '%s'", escapedTarget, escapedPass)
 	if _, err := db.ExecContext(ctx, query); err != nil {
 		return fmt.Errorf("mysql: rollback alter user %s: %w", target, err)
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -43,7 +44,8 @@ func (p *PostgresProvider) Rotate(ctx context.Context, cfg ProviderConfig, curre
 
 	target := p.targetUser(cfg)
 	sanitizedRole := pgx.Identifier{target}.Sanitize()
-	query := fmt.Sprintf("ALTER ROLE %s WITH PASSWORD '%s'", sanitizedRole, newSecret)
+	escapedPass := strings.ReplaceAll(newSecret, "'", "''")
+	query := fmt.Sprintf("ALTER ROLE %s WITH PASSWORD '%s'", sanitizedRole, escapedPass)
 	if _, err := conn.Exec(ctx, query); err != nil {
 		return nil, fmt.Errorf("postgres: alter role %s: %w", target, err)
 	}
@@ -84,7 +86,8 @@ func (p *PostgresProvider) Rollback(ctx context.Context, cfg ProviderConfig, old
 
 	target := p.targetUser(cfg)
 	sanitizedRole := pgx.Identifier{target}.Sanitize()
-	query := fmt.Sprintf("ALTER ROLE %s WITH PASSWORD '%s'", sanitizedRole, oldSecret)
+	escapedPass := strings.ReplaceAll(oldSecret, "'", "''")
+	query := fmt.Sprintf("ALTER ROLE %s WITH PASSWORD '%s'", sanitizedRole, escapedPass)
 	if _, err := conn.Exec(ctx, query); err != nil {
 		return fmt.Errorf("postgres: rollback alter role %s: %w", target, err)
 	}

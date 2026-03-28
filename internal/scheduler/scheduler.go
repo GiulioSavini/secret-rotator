@@ -50,7 +50,8 @@ func (s *Scheduler) jobFunc(secretCfg config.SecretConfig) func() {
 		}
 		defer mu.Unlock()
 
-		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+		defer cancel()
 		err := s.rotateFunc(ctx, secretCfg)
 
 		event := notify.Event{
