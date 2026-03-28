@@ -13,7 +13,7 @@ Secret Rotator goes from zero to a distributable CLI tool in 5 phases. Foundatio
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Project scaffold, CLI skeleton, config loading, .env file handling, Docker integration (completed 2026-03-28)
-- [ ] **Phase 2: Discovery and Crypto** - Secret scanning, strength auditing, encrypted secret store, scan and history commands
+- [x] **Phase 2: Discovery and Crypto** - Secret scanning, strength auditing, encrypted secret store, scan and history commands (completed 2026-03-28)
 - [ ] **Phase 3: Rotation Engine** - Provider system, execution state machine, rollback, all four providers, rotate command
 - [ ] **Phase 4: Scheduling and Operations** - Cron-based scheduling, status command, webhook notifications, Docker label config
 - [ ] **Phase 5: Distribution** - Docker container image, standalone Go binary, goreleaser cross-compilation
@@ -107,7 +107,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete    | 2026-03-28 |
-| 2. Discovery and Crypto | 0/2 | Not started | - |
+| 2. Discovery and Crypto | 0/2 | Complete    | 2026-03-28 |
 | 3. Rotation Engine | 0/? | Not started | - |
 | 4. Scheduling and Operations | 0/? | Not started | - |
 | 5. Distribution | 0/? | Not started | - |
