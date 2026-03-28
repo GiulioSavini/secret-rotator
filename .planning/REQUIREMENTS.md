@@ -30,8 +30,8 @@
 
 - [x] **INFR-01**: Tool restarts affected containers in dependency order with readiness checks
 - [x] **INFR-02**: Old secrets are encrypted at rest using AES-256-GCM with Argon2id key derivation
-- [ ] **INFR-03**: Tool sends webhook notifications (Discord, Slack, generic HTTP) on rotation success/failure
-- [ ] **INFR-04**: Tool supports Docker label-based configuration (com.secret-rotator.schedule)
+- [x] **INFR-03**: Tool sends webhook notifications (Discord, Slack, generic HTTP) on rotation success/failure
+- [x] **INFR-04**: Tool supports Docker label-based configuration (com.secret-rotator.schedule)
 
 ### CLI
 
@@ -94,8 +94,8 @@
 | PROV-04 | Phase 3 | Complete |
 | INFR-01 | Phase 1 | Complete |
 | INFR-02 | Phase 2 | Complete |
-| INFR-03 | Phase 4 | Pending |
-| INFR-04 | Phase 4 | Pending |
+| INFR-03 | Phase 4 | Complete |
+| INFR-04 | Phase 4 | Complete |
 | CLI-01 | Phase 2 | Complete |
 | CLI-02 | Phase 3 | Complete |
 | CLI-03 | Phase 4 | Complete |

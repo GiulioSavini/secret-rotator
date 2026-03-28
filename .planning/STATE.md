@@ -5,7 +5,7 @@ milestone_name: milestone
 status: completed
 stopped_at: Completed 04-02-PLAN.md
 last_updated: "2026-03-28T17:11:02.373Z"
-last_activity: 2026-03-28 -- Completed 03-03-PLAN.md
+last_activity: 2026-03-28 -- Completed 04-01-PLAN.md
 progress:
   total_phases: 5
   completed_phases: 3
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Secrets in self-hosted Docker environments get rotated automatically without manual database console or container restart work.
-**Current focus:** Phase 3: Rotation Engine
+**Current focus:** Phase 4: Scheduling and Operations
 
 ## Current Position
 
-Phase: 3 of 5 (Rotation Engine)
-Plan: 3 of 3 in current phase
-Status: Phase Complete
-Last activity: 2026-03-28 -- Completed 03-03-PLAN.md
+Phase: 4 of 5 (Scheduling and Operations)
+Plan: 2 of 3 in current phase
+Status: In Progress
+Last activity: 2026-03-28 -- Completed 04-01-PLAN.md
 
-Progress: [██████████] 100%
+Progress: [██████████] 91%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [██████████] 100%
 | Phase 03 P01 | 4min | 2 tasks | 7 files |
 | Phase 03 P02 | 6min | 1 tasks | 5 files |
 | Phase 03 P03 | 8min | 2 tasks | 10 files |
+| Phase 04 P01 | 5min | 2 tasks | 6 files |
 | Phase 04 P02 | 4min | 1 tasks | 4 files |
 
 ## Accumulated Context
@@ -92,6 +93,8 @@ Recent decisions affecting current work:
 - [Phase 03]: Admin password resolution: Options[password] > Options[password_env] via os.Getenv
 - [Phase 03]: Redis rollback on CONFIG REWRITE failure: immediate CONFIG SET to old password
 - [Phase 03]: History store optional in rotate command: nil disables recording
+- [Phase 04]: Shared postJSON helper across Discord, Slack, and Generic notifiers
+- [Phase 04]: Cron parser with Descriptor flag for @daily/@weekly support alongside 5-field expressions
 - [Phase 04]: Passphrase optional for status: shows never age without history access
 - [Phase 04]: Only success status entries count toward last rotation time
 
@@ -105,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T17:11:02.371Z
-Stopped at: Completed 04-02-PLAN.md
+Last session: 2026-03-28T17:10:29Z
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
