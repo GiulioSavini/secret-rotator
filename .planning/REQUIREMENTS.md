@@ -9,7 +9,7 @@
 
 - [ ] **DISC-01**: Tool auto-scans `.env` files and identifies secrets by naming patterns (MYSQL_PASSWORD, REDIS_PASSWORD, JWT_SECRET, etc.)
 - [ ] **DISC-02**: Tool audits password strength and flags weak, default, or short passwords
-- [ ] **DISC-03**: Tool works zero-config without `rotator.yml`, scanning the current directory
+- [x] **DISC-03**: Tool works zero-config without `rotator.yml`, scanning the current directory
 - [ ] **DISC-04**: Tool supports multi-file `.env` setups (`.env`, `.env.local`, `docker-compose.override.yml`)
 
 ### Rotation
@@ -44,7 +44,7 @@
 
 - [ ] **DIST-01**: Tool is distributed as a Docker container image
 - [ ] **DIST-02**: Tool is distributed as a standalone Go binary (Linux, macOS, ARM)
-- [ ] **DIST-03**: Tool uses YAML configuration file (`rotator.yml`) for secret definitions
+- [x] **DIST-03**: Tool uses YAML configuration file (`rotator.yml`) for secret definitions
 
 ## v2 Requirements
 
@@ -82,7 +82,7 @@
 |-------------|-------|--------|
 | DISC-01 | Phase 2 | Pending |
 | DISC-02 | Phase 2 | Pending |
-| DISC-03 | Phase 1 | Pending |
+| DISC-03 | Phase 1 | Complete |
 | DISC-04 | Phase 1 | Pending |
 | ROT-01 | Phase 3 | Pending |
 | ROT-02 | Phase 4 | Pending |
@@ -102,7 +102,7 @@
 | CLI-04 | Phase 2 | Pending |
 | DIST-01 | Phase 5 | Pending |
 | DIST-02 | Phase 5 | Pending |
-| DIST-03 | Phase 1 | Pending |
+| DIST-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 23 total
