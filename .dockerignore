@@ -1,0 +1,7 @@
+.git
+.planning
+*.md
+.env*
+rotator.yml
+rotator
+.goreleaser.yml
