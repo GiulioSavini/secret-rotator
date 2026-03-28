@@ -14,10 +14,10 @@
 
 ### Rotation
 
-- [ ] **ROT-01**: User can manually rotate a specific secret via `rotator rotate SECRET_NAME`
+- [x] **ROT-01**: User can manually rotate a specific secret via `rotator rotate SECRET_NAME`
 - [ ] **ROT-02**: Tool supports scheduled rotation via cron expressions in config or Docker labels
 - [x] **ROT-03**: Tool writes `.env` files atomically (temp file + rename) to prevent corruption
-- [ ] **ROT-04**: Tool automatically rolls back if rotation fails (restores old secret, restarts containers)
+- [x] **ROT-04**: Tool automatically rolls back if rotation fails (restores old secret, restarts containers)
 
 ### Providers
 
@@ -84,10 +84,10 @@
 | DISC-02 | Phase 2 | Complete |
 | DISC-03 | Phase 1 | Complete |
 | DISC-04 | Phase 1 | Complete |
-| ROT-01 | Phase 3 | Pending |
+| ROT-01 | Phase 3 | Complete |
 | ROT-02 | Phase 4 | Pending |
 | ROT-03 | Phase 1 | Complete |
-| ROT-04 | Phase 3 | Pending |
+| ROT-04 | Phase 3 | Complete |
 | PROV-01 | Phase 3 | Complete |
 | PROV-02 | Phase 3 | Pending |
 | PROV-03 | Phase 3 | Pending |
