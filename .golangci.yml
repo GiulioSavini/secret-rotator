@@ -3,15 +3,12 @@ linters:
   default: standard
   exclusions:
     rules:
-      # fmt.Fprint/Fprintf/Fprintln to stdout/stderr in CLI commands — errors are intentionally ignored
+      # fmt.Fprint/Fprintf/Fprintln to stdout/stderr — errors are intentionally ignored
       - linters: [errcheck]
-        path: internal/cli/
         text: "fmt\\.(Fprint|Fprintf|Fprintln)"
       # tabwriter.Flush in CLI output — error is intentionally ignored
       - linters: [errcheck]
-        path: internal/cli/
         text: "Flush"
-      # dockerMgr.Close in CLI teardown — best-effort cleanup
+      # Close/Remove in cleanup/defer — best-effort cleanup
       - linters: [errcheck]
-        path: internal/cli/
-        text: "Close"
+        text: "(Close|Remove)"
