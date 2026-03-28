@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/compose-spec/compose-go/v2 v2.10.1
-	github.com/docker/docker v28.1.1+incompatible
+	github.com/docker/docker v29.3.1+incompatible
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/knadh/koanf/parsers/yaml v1.1.0
