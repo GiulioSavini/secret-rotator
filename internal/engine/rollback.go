@@ -48,8 +48,7 @@ func rollback(ctx context.Context, state *RotationState, prov provider.Provider,
 	}
 
 	if len(errs) > 0 {
-		dbState := "unknown"
-		envState := "unknown"
+		var dbState, envState string
 		containerState := "not restarted"
 
 		// Determine actual state based on which rollback steps succeeded

@@ -64,12 +64,11 @@ func TestStoreCorruptedEntry(t *testing.T) {
 		Status:     "success",
 	}))
 
-	// Corrupt one entry in the file by modifying it directly
-	data, err := os.ReadFile(path)
+	// Verify file was written
+	_, err = os.ReadFile(path)
 	require.NoError(t, err)
 
-	// Inject a corrupted entry into the JSON
-	// We'll read the file, add a bad entry, and write it back
+	// Create second store instance to test append
 	store2 := NewStore(path, passphrase)
 
 	// Add another valid entry
