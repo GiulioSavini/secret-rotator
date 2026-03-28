@@ -28,7 +28,7 @@
 
 ### Infrastructure
 
-- [ ] **INFR-01**: Tool restarts affected containers in dependency order with readiness checks
+- [x] **INFR-01**: Tool restarts affected containers in dependency order with readiness checks
 - [ ] **INFR-02**: Old secrets are encrypted at rest using AES-256-GCM with Argon2id key derivation
 - [ ] **INFR-03**: Tool sends webhook notifications (Discord, Slack, generic HTTP) on rotation success/failure
 - [ ] **INFR-04**: Tool supports Docker label-based configuration (com.secret-rotator.schedule)
@@ -92,7 +92,7 @@
 | PROV-02 | Phase 3 | Pending |
 | PROV-03 | Phase 3 | Pending |
 | PROV-04 | Phase 3 | Pending |
-| INFR-01 | Phase 1 | Pending |
+| INFR-01 | Phase 1 | Complete |
 | INFR-02 | Phase 2 | Pending |
 | INFR-03 | Phase 4 | Pending |
 | INFR-04 | Phase 4 | Pending |
