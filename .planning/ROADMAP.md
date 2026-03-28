@@ -64,12 +64,12 @@ Plans:
   4. PostgreSQL provider executes ALTER ROLE to rotate the database password and updates all referencing .env files and containers
   5. Redis provider executes CONFIG SET requirepass plus CONFIG REWRITE and restarts all consumers of that password
   6. If any step in rotation fails, the tool automatically rolls back (restores old secret in DB and .env, restarts containers) leaving the system in its pre-rotation state
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md — Provider interface, registry, password generation, generic provider
+- [ ] 03-02-PLAN.md — Execution engine state machine with LIFO rollback
+- [ ] 03-03-PLAN.md — MySQL, PostgreSQL, Redis providers and rotate CLI wiring
 
 ### Phase 4: Scheduling and Operations
 **Goal**: Users can automate rotation on a schedule, check system status, and receive notifications on rotation events
@@ -107,7 +107,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete    | 2026-03-28 |
-| 2. Discovery and Crypto | 0/2 | Complete    | 2026-03-28 |
-| 3. Rotation Engine | 0/? | Not started | - |
+| 2. Discovery and Crypto | 2/2 | Complete    | 2026-03-28 |
+| 3. Rotation Engine | 0/3 | Not started | - |
 | 4. Scheduling and Operations | 0/? | Not started | - |
 | 5. Distribution | 0/? | Not started | - |
