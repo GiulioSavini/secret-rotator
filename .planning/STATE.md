@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-03-28T17:29:46.050Z"
-last_activity: 2026-03-28 -- Completed 04-03-PLAN.md
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-28T17:32:15Z"
+last_activity: 2026-03-28 -- Completed 05-01-PLAN.md
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Secrets in self-hosted Docker environments get rotated automatically without manual database console or container restart work.
-**Current focus:** Phase 4: Scheduling and Operations
+**Current focus:** Phase 5: Distribution
 
 ## Current Position
 
-Phase: 4 of 5 (Scheduling and Operations)
-Plan: 3 of 3 in current phase
+Phase: 5 of 5 (Distribution)
+Plan: 2 of 2 in current phase
 Status: Completed
-Last activity: 2026-03-28 -- Completed 04-03-PLAN.md
+Last activity: 2026-03-28 -- Completed 05-01-PLAN.md
 
 Progress: [███████████] 100%
 
@@ -61,6 +61,7 @@ Progress: [███████████] 100%
 | Phase 04 P01 | 5min | 2 tasks | 6 files |
 | Phase 04 P02 | 4min | 1 tasks | 4 files |
 | Phase 04 P03 | 4min | 2 tasks | 5 files |
+| Phase 05 P01 | 5min | 2 tasks | 5 files |
 | Phase 05 P02 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
@@ -103,6 +104,8 @@ Recent decisions affecting current work:
 - [Phase 04]: TryLock-based concurrency guard: skip silently rather than queue or error
 - [Phase 04]: Docker label read failure is non-fatal in daemon: logs warning and continues
 - [Phase 05]: Placeholder version.go created for parallel plan 05-01 dependency
+- [Phase 05]: distroless/static-debian12:nonroot as runtime base for minimal attack surface
+- [Phase 05]: fmt.Fprintf to cmd.OutOrStdout() for testable version output
 
 ### Pending Todos
 
@@ -114,6 +117,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T17:29:46.048Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-03-28T17:32:15Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
