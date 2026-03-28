@@ -65,7 +65,7 @@ func TestStoreCorruptedEntry(t *testing.T) {
 	}))
 
 	// Verify file was written
-	_, err = os.ReadFile(path)
+	_, err := os.ReadFile(path)
 	require.NoError(t, err)
 
 	// Create second store instance to test append
@@ -79,7 +79,7 @@ func TestStoreCorruptedEntry(t *testing.T) {
 	}))
 
 	// Now corrupt the file by replacing the first entry's data with garbage
-	data, err = os.ReadFile(path)
+	data, err := os.ReadFile(path)
 	require.NoError(t, err)
 	// Replace base64 data of first entry with invalid base64
 	corrupted := replaceFirstEntryData(data)
@@ -93,7 +93,6 @@ func TestStoreCorruptedEntry(t *testing.T) {
 	// At least 1 entry should be readable
 	assert.GreaterOrEqual(t, len(entries), 1)
 
-	_ = data // suppress unused warning
 }
 
 // replaceFirstEntryData replaces the base64 data of the first encrypted entry with garbage.
