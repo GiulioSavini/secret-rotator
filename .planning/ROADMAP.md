@@ -80,11 +80,12 @@ Plans:
   2. Tool runs in daemon mode executing scheduled rotations defined by cron expressions in config or Docker labels
   3. Tool sends webhook notifications (Discord, Slack, generic HTTP) on rotation success and failure
   4. Tool reads rotation schedule from Docker labels (com.secret-rotator.schedule) as an alternative to YAML config
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — Webhook notifier (Discord, Slack, generic HTTP) and Docker label schedule reader
+- [ ] 04-02-PLAN.md — Status command showing secret state, age, and next rotation
+- [ ] 04-03-PLAN.md — Cron-based scheduler daemon with notification integration
 
 ### Phase 5: Distribution
 **Goal**: Users can install and run the tool as either a Docker container or a standalone binary on Linux, macOS, and ARM
@@ -109,5 +110,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Foundation | 3/3 | Complete    | 2026-03-28 |
 | 2. Discovery and Crypto | 2/2 | Complete    | 2026-03-28 |
 | 3. Rotation Engine | 2/3 | Complete    | 2026-03-28 |
-| 4. Scheduling and Operations | 0/? | Not started | - |
+| 4. Scheduling and Operations | 0/3 | Not started | - |
 | 5. Distribution | 0/? | Not started | - |
