@@ -1,0 +1,39 @@
+version: 2
+
+builds:
+  - main: ./cmd/rotator
+    binary: rotator
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/giulio/secret-rotator/internal/cli.version={{.Version}} -X github.com/giulio/secret-rotator/internal/cli.commit={{.Commit}} -X github.com/giulio/secret-rotator/internal/cli.date={{.Date}}
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - rotator.example.yml
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+
+release:
+  github:
+    owner: giulio
+    name: secret-rotator
