@@ -25,6 +25,17 @@ func (ef *EnvFile) Get(key string) (string, bool) {
 	return "", false
 }
 
+// Reindex rebuilds the internal key-to-line index.
+// Useful for constructing EnvFile values in tests.
+func (ef *EnvFile) Reindex() {
+	ef.index = make(map[string]int, len(ef.Lines))
+	for i, line := range ef.Lines {
+		if line.Key != "" {
+			ef.index[line.Key] = i
+		}
+	}
+}
+
 // Keys returns all keys in file order.
 func (ef *EnvFile) Keys() []string {
 	var keys []string
