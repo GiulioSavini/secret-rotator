@@ -22,9 +22,9 @@
 ### Providers
 
 - [x] **PROV-01**: Generic provider regenerates password, updates `.env`, and restarts containers without DB interaction
-- [ ] **PROV-02**: MySQL/MariaDB provider executes ALTER USER for password rotation
-- [ ] **PROV-03**: PostgreSQL provider executes ALTER ROLE for password rotation
-- [ ] **PROV-04**: Redis provider executes CONFIG SET requirepass + CONFIG REWRITE for password rotation
+- [x] **PROV-02**: MySQL/MariaDB provider executes ALTER USER for password rotation
+- [x] **PROV-03**: PostgreSQL provider executes ALTER ROLE for password rotation
+- [x] **PROV-04**: Redis provider executes CONFIG SET requirepass + CONFIG REWRITE for password rotation
 
 ### Infrastructure
 
@@ -36,7 +36,7 @@
 ### CLI
 
 - [x] **CLI-01**: `rotator scan` command discovers and reports secrets with strength audit
-- [ ] **CLI-02**: `rotator rotate` command performs on-demand secret rotation
+- [x] **CLI-02**: `rotator rotate` command performs on-demand secret rotation
 - [ ] **CLI-03**: `rotator status` command shows current rotation state and schedules
 - [x] **CLI-04**: `rotator history` command shows rotation audit log
 
@@ -89,15 +89,15 @@
 | ROT-03 | Phase 1 | Complete |
 | ROT-04 | Phase 3 | Complete |
 | PROV-01 | Phase 3 | Complete |
-| PROV-02 | Phase 3 | Pending |
-| PROV-03 | Phase 3 | Pending |
-| PROV-04 | Phase 3 | Pending |
+| PROV-02 | Phase 3 | Complete |
+| PROV-03 | Phase 3 | Complete |
+| PROV-04 | Phase 3 | Complete |
 | INFR-01 | Phase 1 | Complete |
 | INFR-02 | Phase 2 | Complete |
 | INFR-03 | Phase 4 | Pending |
 | INFR-04 | Phase 4 | Pending |
 | CLI-01 | Phase 2 | Complete |
-| CLI-02 | Phase 3 | Pending |
+| CLI-02 | Phase 3 | Complete |
 | CLI-03 | Phase 4 | Pending |
 | CLI-04 | Phase 2 | Complete |
 | DIST-01 | Phase 5 | Pending |
