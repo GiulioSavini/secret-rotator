@@ -39,11 +39,14 @@ containers in dependency order.`,
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "show what would be done without making changes")
 
+	rootCmd.Version = version
+
 	rootCmd.AddCommand(NewScanCmd())
 	rootCmd.AddCommand(NewRotateCmd())
 	rootCmd.AddCommand(NewStatusCmd())
 	rootCmd.AddCommand(NewHistoryCmd())
 	rootCmd.AddCommand(NewDaemonCmd())
+	rootCmd.AddCommand(NewVersionCmd())
 
 	return rootCmd
 }
