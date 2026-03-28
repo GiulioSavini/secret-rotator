@@ -37,7 +37,7 @@
 
 - [x] **CLI-01**: `rotator scan` command discovers and reports secrets with strength audit
 - [x] **CLI-02**: `rotator rotate` command performs on-demand secret rotation
-- [ ] **CLI-03**: `rotator status` command shows current rotation state and schedules
+- [x] **CLI-03**: `rotator status` command shows current rotation state and schedules
 - [x] **CLI-04**: `rotator history` command shows rotation audit log
 
 ### Distribution
@@ -98,7 +98,7 @@
 | INFR-04 | Phase 4 | Pending |
 | CLI-01 | Phase 2 | Complete |
 | CLI-02 | Phase 3 | Complete |
-| CLI-03 | Phase 4 | Pending |
+| CLI-03 | Phase 4 | Complete |
 | CLI-04 | Phase 2 | Complete |
 | DIST-01 | Phase 5 | Pending |
 | DIST-02 | Phase 5 | Pending |
