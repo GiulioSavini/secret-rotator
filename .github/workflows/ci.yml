@@ -44,12 +44,12 @@ jobs:
 
       - uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.1
+          version: v2.11
 
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [test, lint]
+    needs: [test]
     steps:
       - uses: actions/checkout@v4
 
