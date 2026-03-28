@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-03-28T15:41:31.670Z"
-last_activity: 2026-03-28 -- Completed 01-03-PLAN.md
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-28T16:04:18.234Z"
+last_activity: 2026-03-28 -- Completed 02-02-PLAN.md
 progress:
   total_phases: 5
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 2
+  total_plans: 5
+  completed_plans: 5
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Secrets in self-hosted Docker environments get rotated automatically without manual database console or container restart work.
-**Current focus:** Phase 1: Foundation
+**Current focus:** Phase 2: Discovery and Crypto
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation)
-Plan: 3 of 3 in current phase
+Phase: 2 of 5 (Discovery and Crypto)
+Plan: 2 of 2 in current phase
 Status: Phase Complete
-Last activity: 2026-03-28 -- Completed 01-03-PLAN.md
+Last activity: 2026-03-28 -- Completed 02-02-PLAN.md
 
 Progress: [██████████] 100%
 
@@ -53,6 +53,8 @@ Progress: [██████████] 100%
 | Phase 01 P01 | 4min | 2 tasks | 11 files |
 | Phase 01 P02 | 5min | 2 tasks | 5 files |
 | Phase 01 P03 | 7min | 2 tasks | 8 files |
+| Phase 02 P01 | 7min | 2 tasks | 8 files |
+| Phase 02 P02 | 7min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -70,6 +72,12 @@ Recent decisions affecting current work:
 - [Phase 01]: Hand-written MockManager over testify/mock codegen for simplicity
 - [Phase 01]: Running-without-healthcheck treated as healthy (pragmatic default)
 - [Phase 01]: Deterministic topo sort via sorted queue insertion for reproducible restart order
+- [Phase 02]: Suffix pattern order matters: longer suffixes (_API_KEY) before shorter (_KEY) to avoid misclassification
+- [Phase 02]: Strength score is min(length_score, entropy_score) -- both dimensions must be strong
+- [Phase 02]: File-referenced secrets (_FILE suffix) excluded from strength auditing
+- [Phase 02]: Fixed salt per history file enables single Argon2id derivation per Store instance
+- [Phase 02]: Corrupted history entries skipped silently for partial results over total failure
+- [Phase 02]: Passphrase resolution: flag > ROTATOR_MASTER_KEY env > config env var
 
 ### Pending Todos
 
@@ -81,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T15:32:18Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-03-28T16:04:18.231Z
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None

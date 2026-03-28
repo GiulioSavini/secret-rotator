@@ -7,8 +7,8 @@
 
 ### Discovery
 
-- [ ] **DISC-01**: Tool auto-scans `.env` files and identifies secrets by naming patterns (MYSQL_PASSWORD, REDIS_PASSWORD, JWT_SECRET, etc.)
-- [ ] **DISC-02**: Tool audits password strength and flags weak, default, or short passwords
+- [x] **DISC-01**: Tool auto-scans `.env` files and identifies secrets by naming patterns (MYSQL_PASSWORD, REDIS_PASSWORD, JWT_SECRET, etc.)
+- [x] **DISC-02**: Tool audits password strength and flags weak, default, or short passwords
 - [x] **DISC-03**: Tool works zero-config without `rotator.yml`, scanning the current directory
 - [x] **DISC-04**: Tool supports multi-file `.env` setups (`.env`, `.env.local`, `docker-compose.override.yml`)
 
@@ -35,7 +35,7 @@
 
 ### CLI
 
-- [ ] **CLI-01**: `rotator scan` command discovers and reports secrets with strength audit
+- [x] **CLI-01**: `rotator scan` command discovers and reports secrets with strength audit
 - [ ] **CLI-02**: `rotator rotate` command performs on-demand secret rotation
 - [ ] **CLI-03**: `rotator status` command shows current rotation state and schedules
 - [ ] **CLI-04**: `rotator history` command shows rotation audit log
@@ -80,8 +80,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DISC-01 | Phase 2 | Pending |
-| DISC-02 | Phase 2 | Pending |
+| DISC-01 | Phase 2 | Complete |
+| DISC-02 | Phase 2 | Complete |
 | DISC-03 | Phase 1 | Complete |
 | DISC-04 | Phase 1 | Complete |
 | ROT-01 | Phase 3 | Pending |
@@ -96,7 +96,7 @@
 | INFR-02 | Phase 2 | Pending |
 | INFR-03 | Phase 4 | Pending |
 | INFR-04 | Phase 4 | Pending |
-| CLI-01 | Phase 2 | Pending |
+| CLI-01 | Phase 2 | Complete |
 | CLI-02 | Phase 3 | Pending |
 | CLI-03 | Phase 4 | Pending |
 | CLI-04 | Phase 2 | Pending |
