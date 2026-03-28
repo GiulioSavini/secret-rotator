@@ -66,7 +66,7 @@ func TestScanFile(t *testing.T) {
 		Path: ".env",
 		Lines: []envfile.Line{
 			{Key: "MYSQL_PASSWORD", Value: "weak"},
-			{Key: "REDIS_PASSWORD", Value: "xK9#mP2$vL5@nQ8&jR4!wT7*yU0^zA3"},
+			{Key: "REDIS_PASSWORD", Value: "xK9#mP2$vL5@nQ8&jR4!wT7*yU0^zA3b"},
 			{Key: "HOSTNAME", Value: "localhost"},
 		},
 	}

@@ -39,7 +39,7 @@ func TestAuditStrength_Good(t *testing.T) {
 
 func TestAuditStrength_Strong(t *testing.T) {
 	// 32+ chars, mixed classes
-	r := AuditStrength("xK9#mP2$vL5@nQ8&jR4!wT7*yU0^zA3")
+	r := AuditStrength("xK9#mP2$vL5@nQ8&jR4!wT7*yU0^zA3b")
 	assert.Equal(t, StrengthStrong, r.Score, "32+ char password with all classes should be strong")
 }
 
