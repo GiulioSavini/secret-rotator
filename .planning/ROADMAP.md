@@ -108,6 +108,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete    | 2026-03-28 |
 | 2. Discovery and Crypto | 2/2 | Complete    | 2026-03-28 |
-| 3. Rotation Engine | 0/3 | Not started | - |
+| 3. Rotation Engine | 1/3 | In progress | - |
 | 4. Scheduling and Operations | 0/? | Not started | - |
 | 5. Distribution | 0/? | Not started | - |

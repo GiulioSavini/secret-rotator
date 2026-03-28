@@ -21,7 +21,7 @@
 
 ### Providers
 
-- [ ] **PROV-01**: Generic provider regenerates password, updates `.env`, and restarts containers without DB interaction
+- [x] **PROV-01**: Generic provider regenerates password, updates `.env`, and restarts containers without DB interaction
 - [ ] **PROV-02**: MySQL/MariaDB provider executes ALTER USER for password rotation
 - [ ] **PROV-03**: PostgreSQL provider executes ALTER ROLE for password rotation
 - [ ] **PROV-04**: Redis provider executes CONFIG SET requirepass + CONFIG REWRITE for password rotation
@@ -88,7 +88,7 @@
 | ROT-02 | Phase 4 | Pending |
 | ROT-03 | Phase 1 | Complete |
 | ROT-04 | Phase 3 | Pending |
-| PROV-01 | Phase 3 | Pending |
+| PROV-01 | Phase 3 | Complete |
 | PROV-02 | Phase 3 | Pending |
 | PROV-03 | Phase 3 | Pending |
 | PROV-04 | Phase 3 | Pending |
