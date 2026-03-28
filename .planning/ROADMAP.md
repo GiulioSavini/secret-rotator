@@ -30,11 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Tool reads `.env` files (including `.env.local` and multi-file setups) preserving comments and formatting
   4. Tool writes `.env` files atomically via temp-file-plus-rename without corrupting existing content
   5. Tool can list, inspect, stop, start, and health-check Docker containers, restarting them in dependency order
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Project scaffold, config loading (koanf), CLI skeleton (Cobra)
+- [ ] 01-02-PLAN.md — .env file reader/writer with atomic writes
+- [ ] 01-03-PLAN.md — Docker manager interface, SDK client, compose dependency ordering
 
 ### Phase 2: Discovery and Crypto
 **Goal**: Users can scan their environment to discover secrets with strength auditing, and the tool can encrypt and store rotation history
@@ -105,7 +106,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/? | Not started | - |
+| 1. Foundation | 0/3 | Planned | - |
 | 2. Discovery and Crypto | 0/? | Not started | - |
 | 3. Rotation Engine | 0/? | Not started | - |
 | 4. Scheduling and Operations | 0/? | Not started | - |
