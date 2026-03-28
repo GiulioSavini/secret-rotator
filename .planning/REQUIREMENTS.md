@@ -43,7 +43,7 @@
 ### Distribution
 
 - [ ] **DIST-01**: Tool is distributed as a Docker container image
-- [ ] **DIST-02**: Tool is distributed as a standalone Go binary (Linux, macOS, ARM)
+- [x] **DIST-02**: Tool is distributed as a standalone Go binary (Linux, macOS, ARM)
 - [x] **DIST-03**: Tool uses YAML configuration file (`rotator.yml`) for secret definitions
 
 ## v2 Requirements
@@ -101,7 +101,7 @@
 | CLI-03 | Phase 4 | Complete |
 | CLI-04 | Phase 2 | Complete |
 | DIST-01 | Phase 5 | Pending |
-| DIST-02 | Phase 5 | Pending |
+| DIST-02 | Phase 5 | Complete |
 | DIST-03 | Phase 1 | Complete |
 
 **Coverage:**
