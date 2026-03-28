@@ -29,7 +29,7 @@
 ### Infrastructure
 
 - [x] **INFR-01**: Tool restarts affected containers in dependency order with readiness checks
-- [ ] **INFR-02**: Old secrets are encrypted at rest using AES-256-GCM with Argon2id key derivation
+- [x] **INFR-02**: Old secrets are encrypted at rest using AES-256-GCM with Argon2id key derivation
 - [ ] **INFR-03**: Tool sends webhook notifications (Discord, Slack, generic HTTP) on rotation success/failure
 - [ ] **INFR-04**: Tool supports Docker label-based configuration (com.secret-rotator.schedule)
 
@@ -38,7 +38,7 @@
 - [x] **CLI-01**: `rotator scan` command discovers and reports secrets with strength audit
 - [ ] **CLI-02**: `rotator rotate` command performs on-demand secret rotation
 - [ ] **CLI-03**: `rotator status` command shows current rotation state and schedules
-- [ ] **CLI-04**: `rotator history` command shows rotation audit log
+- [x] **CLI-04**: `rotator history` command shows rotation audit log
 
 ### Distribution
 
@@ -93,13 +93,13 @@
 | PROV-03 | Phase 3 | Pending |
 | PROV-04 | Phase 3 | Pending |
 | INFR-01 | Phase 1 | Complete |
-| INFR-02 | Phase 2 | Pending |
+| INFR-02 | Phase 2 | Complete |
 | INFR-03 | Phase 4 | Pending |
 | INFR-04 | Phase 4 | Pending |
 | CLI-01 | Phase 2 | Complete |
 | CLI-02 | Phase 3 | Pending |
 | CLI-03 | Phase 4 | Pending |
-| CLI-04 | Phase 2 | Pending |
+| CLI-04 | Phase 2 | Complete |
 | DIST-01 | Phase 5 | Pending |
 | DIST-02 | Phase 5 | Pending |
 | DIST-03 | Phase 1 | Complete |
