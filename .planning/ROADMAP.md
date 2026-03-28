@@ -47,11 +47,11 @@ Plans:
   3. `rotator scan` works zero-config without a `rotator.yml` file present
   4. `rotator history` displays the encrypted rotation audit log with timestamps and outcomes
   5. Old secrets are encrypted at rest using AES-256-GCM with Argon2id key derivation from a master passphrase
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Discovery engine (scanner, patterns, strength auditor) and scan command
+- [ ] 02-02-PLAN.md — Crypto primitives (Argon2id + AES-256-GCM), encrypted history store, and history command
 
 ### Phase 3: Rotation Engine
 **Goal**: Users can rotate secrets on demand with automatic rollback on failure, using any of the four supported providers
@@ -107,7 +107,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete    | 2026-03-28 |
-| 2. Discovery and Crypto | 0/? | Not started | - |
+| 2. Discovery and Crypto | 0/2 | Not started | - |
 | 3. Rotation Engine | 0/? | Not started | - |
 | 4. Scheduling and Operations | 0/? | Not started | - |
 | 5. Distribution | 0/? | Not started | - |
