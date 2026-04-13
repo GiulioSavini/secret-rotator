@@ -16,7 +16,7 @@ type SDKClient struct {
 
 // NewSDKClient creates a new Docker SDK client configured from environment variables.
 func NewSDKClient() (*SDKClient, error) {
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := client.New(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return nil, fmt.Errorf("creating docker client: %w", err)
 	}
