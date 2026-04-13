@@ -6,9 +6,7 @@ import (
 	"strings"
 	"time"
 
-	containerapi "github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/client"
+	"github.com/moby/moby/client"
 )
 
 // SDKClient wraps the Docker SDK client and implements the Manager interface.
@@ -32,32 +30,32 @@ func (s *SDKClient) Close() error {
 
 // ListContainers returns containers matching the given filter.
 func (s *SDKClient) ListContainers(ctx context.Context, filter ContainerFilter) ([]Container, error) {
-	opts := containerapi.ListOptions{
+	opts := client.ContainerListOptions{
 		All: true,
 	}
 
 	if len(filter.Names) > 0 || len(filter.Labels) > 0 {
-		f := filters.NewArgs()
+		f := make(client.Filters)
 		for _, name := range filter.Names {
-			f.Add("name", name)
+			f = f.Add("name", name)
 		}
 		for k, v := range filter.Labels {
 			if v != "" {
-				f.Add("label", k+"="+v)
+				f = f.Add("label", k+"="+v)
 			} else {
-				f.Add("label", k)
+				f = f.Add("label", k)
 			}
 		}
 		opts.Filters = f
 	}
 
-	apiContainers, err := s.cli.ContainerList(ctx, opts)
+	result, err := s.cli.ContainerList(ctx, opts)
 	if err != nil {
 		return nil, fmt.Errorf("listing containers: %w", err)
 	}
 
-	containers := make([]Container, 0, len(apiContainers))
-	for _, c := range apiContainers {
+	containers := make([]Container, 0, len(result.Items))
+	for _, c := range result.Items {
 		name := ""
 		if len(c.Names) > 0 {
 			name = strings.TrimPrefix(c.Names[0], "/")
@@ -66,7 +64,7 @@ func (s *SDKClient) ListContainers(ctx context.Context, filter ContainerFilter) 
 			ID:     c.ID,
 			Name:   name,
 			Image:  c.Image,
-			Status: c.State,
+			Status: string(c.State),
 			Labels: c.Labels,
 		})
 	}
@@ -75,14 +73,16 @@ func (s *SDKClient) ListContainers(ctx context.Context, filter ContainerFilter) 
 
 // InspectContainer returns detailed information about a container.
 func (s *SDKClient) InspectContainer(ctx context.Context, id string) (*Container, error) {
-	resp, err := s.cli.ContainerInspect(ctx, id)
+	result, err := s.cli.ContainerInspect(ctx, id, client.ContainerInspectOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("inspecting container %s: %w", id, err)
 	}
 
+	resp := result.Container
+
 	health := ""
 	if resp.State != nil && resp.State.Health != nil {
-		health = resp.State.Health.Status
+		health = string(resp.State.Health.Status)
 	} else if resp.State != nil && resp.State.Running {
 		health = "none"
 	}
@@ -94,11 +94,16 @@ func (s *SDKClient) InspectContainer(ctx context.Context, id string) (*Container
 		envVars = resp.Config.Env
 	}
 
+	status := ""
+	if resp.State != nil {
+		status = string(resp.State.Status)
+	}
+
 	return &Container{
 		ID:      resp.ID,
 		Name:    name,
 		Image:   resp.Config.Image,
-		Status:  resp.State.Status,
+		Status:  status,
 		Health:  health,
 		Labels:  resp.Config.Labels,
 		EnvVars: envVars,
@@ -108,10 +113,10 @@ func (s *SDKClient) InspectContainer(ctx context.Context, id string) (*Container
 // StopContainer stops a container with the given timeout.
 func (s *SDKClient) StopContainer(ctx context.Context, id string, timeout time.Duration) error {
 	timeoutSec := int(timeout.Seconds())
-	opts := containerapi.StopOptions{
+	opts := client.ContainerStopOptions{
 		Timeout: &timeoutSec,
 	}
-	if err := s.cli.ContainerStop(ctx, id, opts); err != nil {
+	if _, err := s.cli.ContainerStop(ctx, id, opts); err != nil {
 		return fmt.Errorf("stopping container %s: %w", id, err)
 	}
 	return nil
@@ -119,7 +124,7 @@ func (s *SDKClient) StopContainer(ctx context.Context, id string, timeout time.D
 
 // StartContainer starts a stopped container.
 func (s *SDKClient) StartContainer(ctx context.Context, id string) error {
-	if err := s.cli.ContainerStart(ctx, id, containerapi.StartOptions{}); err != nil {
+	if _, err := s.cli.ContainerStart(ctx, id, client.ContainerStartOptions{}); err != nil {
 		return fmt.Errorf("starting container %s: %w", id, err)
 	}
 	return nil
@@ -128,10 +133,10 @@ func (s *SDKClient) StartContainer(ctx context.Context, id string) error {
 // RestartContainer restarts a container with the given timeout.
 func (s *SDKClient) RestartContainer(ctx context.Context, id string, timeout time.Duration) error {
 	timeoutSec := int(timeout.Seconds())
-	opts := containerapi.StopOptions{
+	opts := client.ContainerRestartOptions{
 		Timeout: &timeoutSec,
 	}
-	if err := s.cli.ContainerRestart(ctx, id, opts); err != nil {
+	if _, err := s.cli.ContainerRestart(ctx, id, opts); err != nil {
 		return fmt.Errorf("restarting container %s: %w", id, err)
 	}
 	return nil
@@ -142,3 +147,4 @@ func (s *SDKClient) RestartContainer(ctx context.Context, id string, timeout tim
 func (s *SDKClient) WaitHealthy(ctx context.Context, id string, timeout time.Duration) error {
 	return waitHealthy(ctx, s, id, timeout)
 }
+
