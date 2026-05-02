@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	github.com/compose-spec/compose-go/v2 v2.10.2
-	github.com/go-sql-driver/mysql v1.9.3
+	github.com/go-sql-driver/mysql v1.10.0
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/knadh/koanf/parsers/yaml v1.1.0
 	github.com/knadh/koanf/providers/env v1.1.0
@@ -19,7 +19,7 @@ require (
 )
 
 require (
-	filippo.io/edwards25519 v1.1.1 // indirect
+	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
