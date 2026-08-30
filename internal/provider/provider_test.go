@@ -17,8 +17,8 @@ func (s *stubProvider) Name() string { return s.name }
 func (s *stubProvider) Rotate(_ context.Context, _ ProviderConfig, _ string) (*Result, error) {
 	return &Result{}, nil
 }
-func (s *stubProvider) Verify(_ context.Context, _ ProviderConfig, _ string) error  { return nil }
-func (s *stubProvider) Rollback(_ context.Context, _ ProviderConfig, _ string) error { return nil }
+func (s *stubProvider) Verify(_ context.Context, _ ProviderConfig, _ string) error   { return nil }
+func (s *stubProvider) Rollback(_ context.Context, _ ProviderConfig, _, _ string) error { return nil }
 
 func TestRegistryGet(t *testing.T) {
 	r := NewRegistry()

@@ -79,7 +79,7 @@ func (m *MySQLProvider) Verify(ctx context.Context, cfg ProviderConfig, secret s
 }
 
 // Rollback connects as admin and restores the target user's password to oldSecret.
-func (m *MySQLProvider) Rollback(ctx context.Context, cfg ProviderConfig, oldSecret string) error {
+func (m *MySQLProvider) Rollback(ctx context.Context, cfg ProviderConfig, oldSecret, newSecret string) error {
 	adminPass := m.adminPassword(cfg)
 	dsn := mysqlDSN(cfg.Username, adminPass, cfg.Host, cfg.Port)
 	target := m.targetUser(cfg)

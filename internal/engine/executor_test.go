@@ -22,7 +22,7 @@ type mockProvider struct {
 	name         string
 	rotateFunc   func(ctx context.Context, cfg provider.ProviderConfig, cur string) (*provider.Result, error)
 	verifyFunc   func(ctx context.Context, cfg provider.ProviderConfig, secret string) error
-	rollbackFunc func(ctx context.Context, cfg provider.ProviderConfig, old string) error
+	rollbackFunc func(ctx context.Context, cfg provider.ProviderConfig, old, new string) error
 
 	rotateCalls   int
 	verifyCalls   int
@@ -47,10 +47,10 @@ func (m *mockProvider) Verify(ctx context.Context, cfg provider.ProviderConfig, 
 	return nil
 }
 
-func (m *mockProvider) Rollback(ctx context.Context, cfg provider.ProviderConfig, old string) error {
+func (m *mockProvider) Rollback(ctx context.Context, cfg provider.ProviderConfig, old, new string) error {
 	m.rollbackCalls++
 	if m.rollbackFunc != nil {
-		return m.rollbackFunc(ctx, cfg, old)
+		return m.rollbackFunc(ctx, cfg, old, new)
 	}
 	return nil
 }

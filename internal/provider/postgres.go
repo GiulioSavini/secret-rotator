@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -74,7 +75,7 @@ func (p *PostgresProvider) Verify(ctx context.Context, cfg ProviderConfig, secre
 }
 
 // Rollback connects as admin and restores the target role's password to oldSecret.
-func (p *PostgresProvider) Rollback(ctx context.Context, cfg ProviderConfig, oldSecret string) error {
+func (p *PostgresProvider) Rollback(ctx context.Context, cfg ProviderConfig, oldSecret, newSecret string) error {
 	adminPass := p.adminPassword(cfg)
 	connStr := pgConnStr(cfg.Username, adminPass, cfg.Host, cfg.Port, cfg.Database)
 
@@ -122,5 +123,15 @@ func pgConnStr(user, pass, host string, port int, database string) string {
 	if port == 0 {
 		port = 5432
 	}
-	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s", user, pass, host, port, database)
+	path := database
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+	u := &url.URL{
+		Scheme: "postgres",
+		User:   url.UserPassword(user, pass),
+		Host:   fmt.Sprintf("%s:%d", host, port),
+		Path:   path,
+	}
+	return u.String()
 }

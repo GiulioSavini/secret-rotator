@@ -74,7 +74,7 @@ func (r *RedisProvider) Verify(ctx context.Context, cfg ProviderConfig, secret s
 
 // Rollback connects with the old password first; if that fails, tries the new password.
 // Then sets requirepass back to oldSecret and persists with CONFIG REWRITE.
-func (r *RedisProvider) Rollback(ctx context.Context, cfg ProviderConfig, oldSecret string) error {
+func (r *RedisProvider) Rollback(ctx context.Context, cfg ProviderConfig, oldSecret, newSecret string) error {
 	addr := redisAddr(cfg.Host, cfg.Port)
 
 	// Try connecting with old password first
@@ -84,11 +84,16 @@ func (r *RedisProvider) Rollback(ctx context.Context, cfg ProviderConfig, oldSec
 	})
 
 	if err := client.Ping(ctx).Err(); err != nil {
-		// Old password doesn't work, try empty or some other approach
 		client.Close()
-		// The new password may still be active; we don't have it here,
-		// so this rollback attempt fails
-		return fmt.Errorf("redis: rollback cannot connect with old password: %w", err)
+		// Old password didn't work. Try connecting with newSecret
+		client = redis.NewClient(&redis.Options{
+			Addr:     addr,
+			Password: newSecret,
+		})
+		if err := client.Ping(ctx).Err(); err != nil {
+			client.Close();
+			return fmt.Errorf("redis: rollback cannot connect with either old or new password: %w", err)
+		}
 	}
 
 	if err := client.ConfigSet(ctx, "requirepass", oldSecret).Err(); err != nil {

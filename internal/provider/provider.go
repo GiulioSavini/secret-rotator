@@ -14,7 +14,7 @@ type Provider interface {
 	Verify(ctx context.Context, cfg ProviderConfig, secret string) error
 
 	// Rollback reverts the target service to the old secret.
-	Rollback(ctx context.Context, cfg ProviderConfig, oldSecret string) error
+	Rollback(ctx context.Context, cfg ProviderConfig, oldSecret, newSecret string) error
 }
 
 // ProviderConfig holds connection details for provider operations.

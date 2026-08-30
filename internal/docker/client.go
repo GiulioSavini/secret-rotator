@@ -147,4 +147,3 @@ func (s *SDKClient) RestartContainer(ctx context.Context, id string, timeout tim
 func (s *SDKClient) WaitHealthy(ctx context.Context, id string, timeout time.Duration) error {
 	return waitHealthy(ctx, s, id, timeout)
 }
-

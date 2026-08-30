@@ -25,7 +25,7 @@ type Scheduler struct {
 // The cron parser supports standard 5-field expressions and descriptors like @daily, @weekly.
 func NewScheduler(rotateFn func(ctx context.Context, cfg config.SecretConfig) error, dispatcher *notify.Dispatcher) *Scheduler {
 	c := cron.New(cron.WithParser(cron.NewParser(
-		cron.Minute|cron.Hour|cron.Dom|cron.Month|cron.Dow|cron.Descriptor,
+		cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor,
 	)))
 	return &Scheduler{
 		cron:       c,

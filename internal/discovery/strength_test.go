@@ -68,10 +68,10 @@ func TestAuditStrength_DefaultDetection(t *testing.T) {
 
 func TestEntropy(t *testing.T) {
 	tests := []struct {
-		name        string
-		password    string
-		minEntropy  float64
-		maxEntropy  float64
+		name       string
+		password   string
+		minEntropy float64
+		maxEntropy float64
 	}{
 		// 8 lowercase chars: 8 * log2(26) ≈ 37.6
 		{"lowercase_8", "abcdefgh", 37.0, 38.5},

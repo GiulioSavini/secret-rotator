@@ -29,7 +29,7 @@ func TestRollbackAfterUpdateEnv(t *testing.T) {
 		EnvFilePath:   envPath,
 	}
 
-	err := rollback(context.Background(), state, prov, &mockDockerManager{}, 30*time.Second)
+	err := rollback(context.Background(), state, prov, provider.ProviderConfig{}, &mockDockerManager{}, 30*time.Second)
 	require.NoError(t, err)
 
 	// .env should be restored
@@ -60,7 +60,7 @@ func TestRollbackAfterRestart(t *testing.T) {
 		Containers:    []string{"app", "worker"},
 	}
 
-	err := rollback(context.Background(), state, prov, dockerMgr, 30*time.Second)
+	err := rollback(context.Background(), state, prov, provider.ProviderConfig{}, dockerMgr, 30*time.Second)
 	require.NoError(t, err)
 
 	// .env should be restored
@@ -84,7 +84,7 @@ func TestRollbackAfterVerifyDB(t *testing.T) {
 		NewSecret:   "new-secret",
 	}
 
-	err := rollback(context.Background(), state, prov, &mockDockerManager{}, 30*time.Second)
+	err := rollback(context.Background(), state, prov, provider.ProviderConfig{}, &mockDockerManager{}, 30*time.Second)
 	require.NoError(t, err)
 	assert.Equal(t, 1, prov.rollbackCalls, "should rollback DB password")
 }
@@ -105,7 +105,7 @@ func TestRollbackGenericProviderSkipsDB(t *testing.T) {
 		EnvFilePath:   envPath,
 	}
 
-	err := rollback(context.Background(), state, prov, &mockDockerManager{}, 30*time.Second)
+	err := rollback(context.Background(), state, prov, provider.ProviderConfig{}, &mockDockerManager{}, 30*time.Second)
 	require.NoError(t, err)
 	assert.Equal(t, 0, prov.rollbackCalls, "generic provider should not rollback DB")
 
@@ -118,7 +118,7 @@ func TestRollbackGenericProviderSkipsDB(t *testing.T) {
 func TestRollbackFailureReturnsDetailedError(t *testing.T) {
 	prov := &mockProvider{
 		name: "mysql",
-		rollbackFunc: func(_ context.Context, _ provider.ProviderConfig, _ string) error {
+		rollbackFunc: func(_ context.Context, _ provider.ProviderConfig, _, _ string) error {
 			return fmt.Errorf("db connection lost")
 		},
 	}
@@ -129,7 +129,7 @@ func TestRollbackFailureReturnsDetailedError(t *testing.T) {
 		NewSecret:   "new-secret",
 	}
 
-	err := rollback(context.Background(), state, prov, &mockDockerManager{}, 30*time.Second)
+	err := rollback(context.Background(), state, prov, provider.ProviderConfig{}, &mockDockerManager{}, 30*time.Second)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "rollback failed")
 	assert.Contains(t, err.Error(), "db connection lost")
@@ -148,7 +148,7 @@ func TestRollbackLIFOOrder(t *testing.T) {
 	var order []string
 	prov := &mockProvider{
 		name: "mysql",
-		rollbackFunc: func(_ context.Context, _ provider.ProviderConfig, _ string) error {
+		rollbackFunc: func(_ context.Context, _ provider.ProviderConfig, _, _ string) error {
 			order = append(order, "db_rollback")
 			return nil
 		},
@@ -169,7 +169,7 @@ func TestRollbackLIFOOrder(t *testing.T) {
 		Containers:    []string{"app"},
 	}
 
-	err := rollback(context.Background(), state, prov, dockerMgr, 30*time.Second)
+	err := rollback(context.Background(), state, prov, provider.ProviderConfig{}, dockerMgr, 30*time.Second)
 	require.NoError(t, err)
 
 	// LIFO: restore env first, then restart, then DB rollback

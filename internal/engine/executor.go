@@ -97,7 +97,7 @@ func (e *Engine) Execute(ctx context.Context, secretCfg config.SecretConfig) err
 	state.CurrentStep = StepVerifyDB
 	if e.provider.Name() != "generic" {
 		if err := e.provider.Verify(ctx, provCfg, state.NewSecret); err != nil {
-			rollbackErr := rollback(ctx, state, e.provider, e.docker, e.timeout)
+			rollbackErr := rollback(ctx, state, e.provider, provCfg, e.docker, e.timeout)
 			e.recordFailure(state, err)
 			if rollbackErr != nil {
 				return fmt.Errorf("verify: %w (rollback also failed: %v)", err, rollbackErr)
@@ -111,7 +111,7 @@ func (e *Engine) Execute(ctx context.Context, secretCfg config.SecretConfig) err
 	for _, envPath := range envFilePaths {
 		ef2, err := envfile.Read(envPath)
 		if err != nil {
-			rollbackErr := rollback(ctx, state, e.provider, e.docker, e.timeout)
+			rollbackErr := rollback(ctx, state, e.provider, provCfg, e.docker, e.timeout)
 			e.recordFailure(state, err)
 			if rollbackErr != nil {
 				return fmt.Errorf("read env %s: %w (rollback also failed: %v)", envPath, err, rollbackErr)
@@ -120,7 +120,7 @@ func (e *Engine) Execute(ctx context.Context, secretCfg config.SecretConfig) err
 		}
 		ef2.Set(secretCfg.EnvKey, state.NewSecret)
 		if err := ef2.WriteAtomic(); err != nil {
-			rollbackErr := rollback(ctx, state, e.provider, e.docker, e.timeout)
+			rollbackErr := rollback(ctx, state, e.provider, provCfg, e.docker, e.timeout)
 			e.recordFailure(state, err)
 			if rollbackErr != nil {
 				return fmt.Errorf("write env %s: %w (rollback also failed: %v)", envPath, err, rollbackErr)
@@ -133,7 +133,7 @@ func (e *Engine) Execute(ctx context.Context, secretCfg config.SecretConfig) err
 	state.CurrentStep = StepRestart
 	if len(secretCfg.Containers) > 0 {
 		if err := docker.RestartInOrder(ctx, e.docker, secretCfg.Containers, e.timeout); err != nil {
-			rollbackErr := rollback(ctx, state, e.provider, e.docker, e.timeout)
+			rollbackErr := rollback(ctx, state, e.provider, provCfg, e.docker, e.timeout)
 			e.recordFailure(state, err)
 			if rollbackErr != nil {
 				return fmt.Errorf("restart: %w (rollback also failed: %v)", err, rollbackErr)

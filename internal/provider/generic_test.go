@@ -57,7 +57,7 @@ func TestGenericProviderVerify(t *testing.T) {
 
 func TestGenericProviderRollback(t *testing.T) {
 	p := &GenericProvider{}
-	err := p.Rollback(context.Background(), ProviderConfig{}, "any")
+	err := p.Rollback(context.Background(), ProviderConfig{}, "any", "new")
 	assert.NoError(t, err)
 }
 

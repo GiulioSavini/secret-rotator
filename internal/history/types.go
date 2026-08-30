@@ -16,7 +16,7 @@ type HistoryEntry struct {
 // HistoryFile is the on-disk format for the encrypted history store.
 type HistoryFile struct {
 	Version int              `json:"version"`
-	Salt    string           `json:"salt"`    // base64-encoded salt for key derivation
+	Salt    string           `json:"salt"` // base64-encoded salt for key derivation
 	Entries []EncryptedEntry `json:"entries"`
 }
 

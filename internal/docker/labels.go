@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	labelPrefix   = "com.secret-rotator."
-	labelSuffix   = ".schedule"
-	globalLabel   = "com.secret-rotator.schedule"
+	labelPrefix = "com.secret-rotator."
+	labelSuffix = ".schedule"
+	globalLabel = "com.secret-rotator.schedule"
 )
 
 // ScheduleLabel represents a cron schedule discovered from a Docker container label.

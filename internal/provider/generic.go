@@ -45,6 +45,6 @@ func (g *GenericProvider) Verify(_ context.Context, _ ProviderConfig, _ string) 
 
 // Rollback is a no-op for generic secrets (the engine handles .env file
 // restore and container restarts).
-func (g *GenericProvider) Rollback(_ context.Context, _ ProviderConfig, _ string) error {
+func (g *GenericProvider) Rollback(_ context.Context, _ ProviderConfig, _, _ string) error {
 	return nil
 }

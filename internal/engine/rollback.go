@@ -13,7 +13,7 @@ import (
 
 // rollback undoes completed rotation steps in LIFO order.
 // It collects all errors and returns a detailed message if any rollback step fails.
-func rollback(ctx context.Context, state *RotationState, prov provider.Provider, dockerMgr docker.Manager, timeout time.Duration) error {
+func rollback(ctx context.Context, state *RotationState, prov provider.Provider, provCfg provider.ProviderConfig, dockerMgr docker.Manager, timeout time.Duration) error {
 	var errs []string
 
 	// LIFO: undo steps in reverse order of completion
@@ -41,8 +41,7 @@ func rollback(ctx context.Context, state *RotationState, prov provider.Provider,
 
 	// Rollback DB password if provider is not generic and rotation was called
 	if state.CurrentStep >= StepGenerate && prov.Name() != "generic" {
-		cfg := provider.ProviderConfig{} // rollback only needs old secret
-		if err := prov.Rollback(ctx, cfg, state.OldSecret); err != nil {
+		if err := prov.Rollback(ctx, provCfg, state.OldSecret, state.NewSecret); err != nil {
 			errs = append(errs, fmt.Sprintf("provider rollback: %v", err))
 		}
 	}
