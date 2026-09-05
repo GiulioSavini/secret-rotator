@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	github.com/compose-spec/compose-go/v2 v2.14.0
-	github.com/go-sql-driver/mysql v1.10.0
+	github.com/go-sql-driver/mysql v1.10.1
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/knadh/koanf/parsers/yaml v1.1.1
 	github.com/knadh/koanf/providers/env v1.1.0
