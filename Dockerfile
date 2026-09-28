@@ -16,9 +16,9 @@ ARG DATE=unknown
 
 RUN CGO_ENABLED=0 go build \
     -ldflags "-s -w \
-      -X github.com/giulio/secret-rotator/internal/cli.version=${VERSION} \
-      -X github.com/giulio/secret-rotator/internal/cli.commit=${COMMIT} \
-      -X github.com/giulio/secret-rotator/internal/cli.date=${DATE}" \
+      -X github.com/giulio/secret-rotator/internal/interfaces/cli.version=${VERSION} \
+      -X github.com/giulio/secret-rotator/internal/interfaces/cli.commit=${COMMIT} \
+      -X github.com/giulio/secret-rotator/internal/interfaces/cli.date=${DATE}" \
     -o /rotator ./cmd/rotator
 
 # Create the mount points with the right ownership. distroless has no shell,

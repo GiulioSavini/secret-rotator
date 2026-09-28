@@ -12,7 +12,7 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -s -w -X github.com/giulio/secret-rotator/internal/cli.version={{.Version}} -X github.com/giulio/secret-rotator/internal/cli.commit={{.Commit}} -X github.com/giulio/secret-rotator/internal/cli.date={{.Date}}
+      - -s -w -X github.com/giulio/secret-rotator/internal/interfaces/cli.version={{.Version}} -X github.com/giulio/secret-rotator/internal/interfaces/cli.commit={{.Commit}} -X github.com/giulio/secret-rotator/internal/interfaces/cli.date={{.Date}}
 
 archives:
   - format: tar.gz

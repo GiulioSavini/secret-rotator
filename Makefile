@@ -12,7 +12,7 @@
 VERSION ?= dev
 COMMIT  ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
 DATE    ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-LDFLAGS := -s -w -X github.com/giulio/secret-rotator/internal/cli.version=$(VERSION) -X github.com/giulio/secret-rotator/internal/cli.commit=$(COMMIT) -X github.com/giulio/secret-rotator/internal/cli.date=$(DATE)
+LDFLAGS := -s -w -X github.com/giulio/secret-rotator/internal/interfaces/cli.version=$(VERSION) -X github.com/giulio/secret-rotator/internal/interfaces/cli.commit=$(COMMIT) -X github.com/giulio/secret-rotator/internal/interfaces/cli.date=$(DATE)
 
 .DEFAULT_GOAL := build
 

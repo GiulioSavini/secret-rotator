@@ -37,6 +37,9 @@ secrets:
       password_env: MYSQL_ROOT_PASSWORD
       # Uncomment to rotate a different account than the admin one.
       # target_user: app_user
+      # MySQL accounts are 'user'@'host'. Defaults to '%', which is how
+      # Compose stacks normally define them.
+      # target_user_host: "%"
     schedule: "0 3 1 * *"   # 03:00 on the 1st of each month
     length: 32              # bytes of entropy, base64-encoded
 

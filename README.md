@@ -103,7 +103,10 @@ secrets:
 | `redis` | `CONFIG SET requirepass` + `CONFIG REWRITE` | `host` |
 | `generic` | New value in the `.env` files, then restart | — |
 
-Common optional keys: `port`, `target_user`, `length`.
+Common optional keys: `port`, `target_user`, `target_user_host` (MySQL's
+`'user'@'host'`, default `%`), `length`. An unrecognised key under `provider:`
+is reported as a warning rather than ignored, so a typo does not silently
+rotate the wrong account.
 
 `password_env` names an environment variable holding the **current** admin
 password. It is looked up in the secret's `.env` file first and in rotator's
@@ -165,27 +168,33 @@ Environment: `ROTATOR_CONFIG`, `ROTATOR_DATA_DIR`, `ROTATOR_MASTER_KEY`.
 
 ## Known limitations
 
-These are real, reproducible gaps. They are listed here rather than left to be
-discovered in production.
+Real, reproducible gaps, listed here rather than left to be discovered in
+production.
 
-- **Rollback restores only the first `.env` file.** When a secret uses
-  `env_files:` with more than one entry, a failed rotation restores the first
-  one; the others keep the new value while the database has been rolled back
-  to the old one. Use a single `env_file:` per secret until this is fixed.
-- **Rollback writes `.env` with mode `0644`.** The normal write path preserves
-  the original permissions; the rollback path does not, so a file that was
-  `0600` becomes world-readable after a failed rotation.
-- **MySQL admin passwords are not escaped in the DSN.** An admin password
-  containing `@` or `/` breaks the connection string. Generated passwords are
-  unaffected (base64 has no such characters); a hand-set admin password may
-  be. PostgreSQL is unaffected.
-- **MySQL rotates `'<user>'@'%'` only.** An account defined as
-  `'app'@'localhost'` is not matched.
 - **The history keeps the previous secret in cleartext** inside the encrypted
   entry, indefinitely. Treat `history.json` as a credential store and control
-  access to it accordingly.
-- **No lock between instances.** The daemon serialises rotations within one
-  process; two rotator processes over the same project are not coordinated.
+  access to it accordingly. Set `ROTATOR_AUDIT_OMIT_PREVIOUS=1` to stop
+  recording it, at the cost of losing the ability to recover a replaced value.
+- **No lock between instances.** The daemon serialises rotations of the same
+  secret within one process; two rotator processes over the same project are
+  not coordinated.
+- **Redis needs a rewritable config file.** Rotation uses `CONFIG SET
+  requirepass` followed by `CONFIG REWRITE`. A server started with
+  `--requirepass` on the command line has nothing to rewrite; the rotation
+  reports this and rolls itself back rather than leaving the new password in
+  memory only.
+- **No metrics or health endpoint.** The daemon logs to stderr; there is
+  nothing to scrape and nothing for a liveness probe to hit.
+
+## Architecture
+
+Hexagonal, with a domain-driven core: `internal/domain` holds the model and the
+ports, `internal/application` the use cases, `internal/infrastructure` the
+adapters, `internal/interfaces/cli` the commands and the composition root.
+`internal/architecture_test.go` fails the build if a dependency points the
+wrong way.
+
+See [ARCHITECTURE.md](ARCHITECTURE.md), including how to add a provider.
 
 ## Development
 
