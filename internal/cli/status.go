@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"text/tabwriter"
 	"time"
 
@@ -15,7 +14,6 @@ import (
 // NewStatusCmd creates the status subcommand.
 func NewStatusCmd() *cobra.Command {
 	var passphrase string
-	var dir string
 
 	cmd := &cobra.Command{
 		Use:   "status",
@@ -23,7 +21,11 @@ func NewStatusCmd() *cobra.Command {
 		Long:  `Status displays the current state of all managed secrets including age and next rotation time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if AppConfig == nil || len(AppConfig.Secrets) == 0 {
+				// status is read-only, so guide the user instead of failing.
 				fmt.Fprintln(cmd.OutOrStdout(), "No secrets configured.")
+				if err := AppConfig.RequireSecrets(); err != nil {
+					fmt.Fprintf(cmd.OutOrStdout(), "\n%v\n", err)
+				}
 				return nil
 			}
 
@@ -32,9 +34,9 @@ func NewStatusCmd() *cobra.Command {
 
 			pp := resolvePassphrase(passphrase)
 			if pp != "" {
-				historyPath := filepath.Join(dir, ".rotator", "history.json")
-				if _, err := os.Stat(historyPath); err == nil {
-					store := history.NewStore(historyPath, []byte(pp))
+				path := historyPath()
+				if _, err := os.Stat(path); err == nil {
+					store := history.NewStore(path, []byte(pp))
 					entries, err := store.List()
 					if err == nil {
 						for _, e := range entries {
@@ -89,7 +91,6 @@ func NewStatusCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&passphrase, "passphrase", "", "master passphrase for history decryption")
-	cmd.Flags().StringVar(&dir, "dir", ".", "directory containing .rotator/history.json")
 
 	return cmd
 }

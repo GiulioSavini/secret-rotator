@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"text/tabwriter"
 
 	"github.com/giulio/secret-rotator/internal/history"
@@ -13,7 +12,6 @@ import (
 // NewHistoryCmd creates the history subcommand.
 func NewHistoryCmd() *cobra.Command {
 	var passphrase string
-	var dir string
 	var limit int
 
 	cmd := &cobra.Command{
@@ -27,8 +25,7 @@ func NewHistoryCmd() *cobra.Command {
 				return fmt.Errorf("master passphrase required: set --passphrase flag, ROTATOR_MASTER_KEY env var, or configure master_key_env in rotator.yml")
 			}
 
-			historyPath := filepath.Join(dir, ".rotator", "history.json")
-			store := history.NewStore(historyPath, []byte(pp))
+			store := history.NewStore(historyPath(), []byte(pp))
 
 			entries, err := store.List()
 			if err != nil {
@@ -63,7 +60,6 @@ func NewHistoryCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&passphrase, "passphrase", "", "master passphrase for decryption")
-	cmd.Flags().StringVar(&dir, "dir", ".", "directory containing .rotator/history.json")
 	cmd.Flags().IntVar(&limit, "limit", 0, "limit number of entries shown (0 = all)")
 
 	return cmd

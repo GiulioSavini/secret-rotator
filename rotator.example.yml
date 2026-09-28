@@ -1,44 +1,86 @@
-# Rotator configuration example
-# Copy to rotator.yml and customize for your environment.
+# Rotator configuration example.
+#
+# Copy to rotator.yml next to your .env files and adjust. Every relative path
+# below is resolved against this file, not the working directory, so scheduled
+# and manual runs always touch the same files.
+#
+# Faster alternative: run `rotator init` to generate this from your project.
 
-# Environment variable containing the master encryption key (optional).
-# Used to encrypt secret history entries at rest.
+# Environment variable holding the passphrase used to encrypt the rotation
+# history at rest. Rotations still run without it, but nothing is recorded.
 master_key_env: ROTATOR_MASTER_KEY
 
-# Secret definitions
+# Optional. Used to restart containers in dependency order. Auto-discovered
+# from compose.yaml / docker-compose.yml next to this file when omitted.
+# compose_file: docker-compose.yml
+
 secrets:
-  # MySQL root password rotation
+  # --- MySQL / MariaDB -----------------------------------------------------
+  # Rotates the password of provider.target_user (defaults to provider.username)
+  # with ALTER USER.
   - name: mysql_root_password
     type: mysql
     env_key: MYSQL_ROOT_PASSWORD
     env_file: .env
+    # Compose service names are resolved to real container names automatically.
     containers:
-      - mysql
+      - db
       - app
     provider:
-      host: localhost
+      host: db
       port: "3306"
-      user: root
-    schedule: "0 3 * * 0"   # Weekly at 3am Sunday
+      # Admin account used to run ALTER USER.
+      username: root
+      # Where the admin password comes from. Looked up in the .env file above
+      # first, then in rotator's own environment. Prefer this over 'password',
+      # which puts a credential in this file.
+      password_env: MYSQL_ROOT_PASSWORD
+      # Uncomment to rotate a different account than the admin one.
+      # target_user: app_user
+    schedule: "0 3 1 * *"   # 03:00 on the 1st of each month
+    length: 32              # bytes of entropy, base64-encoded
+
+  # --- PostgreSQL ----------------------------------------------------------
+  # Rotates the password of provider.target_user with ALTER ROLE.
+  - name: postgres_password
+    type: postgres
+    env_key: POSTGRES_PASSWORD
+    env_file: .env
+    containers:
+      - db
+      - app
+    provider:
+      host: db
+      port: "5432"
+      username: postgres
+      # Database to connect to for the ALTER ROLE statement.
+      database: postgres
+      password_env: POSTGRES_PASSWORD
+      # target_user: app_user
+    schedule: "0 3 1 * *"
     length: 32
 
-  # Redis password rotation
+  # --- Redis ---------------------------------------------------------------
+  # Uses CONFIG SET requirepass followed by CONFIG REWRITE, so the server must
+  # have been started with a config file it is allowed to rewrite. A Redis
+  # started with --requirepass on the command line cannot be rotated this way.
   - name: redis_password
     type: redis
     env_key: REDIS_PASSWORD
     env_file: .env
     containers:
-      - redis
+      - cache
       - app
-      - worker
     provider:
-      host: localhost
+      host: cache
       port: "6379"
-    schedule: "0 4 * * 0"
-    length: 64
+    schedule: "0 4 1 * *"
+    length: 32
 
-  # Generic API key rotation (multi-file)
-  - name: api_secret_key
+  # --- Generic -------------------------------------------------------------
+  # No backing service: generates a new value, writes it to every listed file
+  # and restarts the containers. Use for API keys, JWT and session secrets.
+  - name: app_secret_key
     type: generic
     env_key: SECRET_KEY
     env_files:
@@ -48,7 +90,9 @@ secrets:
       - app
     length: 48
 
-# Notification targets (optional)
-notifications:
-  - type: slack
-    url: https://hooks.slack.com/services/xxx/yyy/zzz
+# Optional webhook targets, notified on every rotation outcome.
+# notifications:
+#   - type: slack
+#     url: https://hooks.slack.com/services/xxx/yyy/zzz
+#   - type: discord
+#     url: https://discord.com/api/webhooks/xxx/yyy

@@ -1,0 +1,76 @@
+# A self-contained stack you can actually start, to see a rotation happen
+# end to end without touching a real environment.
+#
+#   cd examples/quickstart
+#   cp .env.example .env
+#   echo "DOCKER_GID=$(stat -c '%g' /var/run/docker.sock)" >> .env
+#   docker compose up -d
+#   docker compose run --rm rotator rotate postgres_password --dry-run
+#   docker compose run --rm rotator rotate postgres_password
+#   docker compose run --rm rotator history
+
+name: rotator-quickstart
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_DB: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  cache:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+  # Stands in for your application: it only needs to restart with the new
+  # values, so any image that stays up will do.
+  app:
+    image: alpine:3.22
+    restart: unless-stopped
+    command: ["sleep", "infinity"]
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+  rotator:
+    build:
+      context: ../..
+    volumes:
+      - ./:/config
+      - rotator-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      ROTATOR_MASTER_KEY: ${ROTATOR_MASTER_KEY:?set ROTATOR_MASTER_KEY in .env}
+    group_add:
+      - "${DOCKER_GID:-999}"
+    security_opt:
+      - no-new-privileges:true
+    # Started on demand by `docker compose run`; switch to "daemon" to let the
+    # schedules in rotator.yml drive rotations.
+    command: ["status"]
+    depends_on:
+      - db
+      - cache
+
+volumes:
+  rotator-data:

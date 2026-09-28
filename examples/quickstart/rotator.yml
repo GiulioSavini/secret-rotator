@@ -1,0 +1,44 @@
+# Configuration for the quickstart stack. Paths are relative to this file.
+
+master_key_env: ROTATOR_MASTER_KEY
+
+# Restart order is derived from depends_on in this file.
+compose_file: docker-compose.yml
+
+secrets:
+  # Rotates the password of the 'app' Postgres role. The admin connection uses
+  # the same role, so provider.username and target_user are both 'app'.
+  - name: postgres_password
+    type: postgres
+    env_key: POSTGRES_PASSWORD
+    env_file: .env
+    containers:
+      - db
+      - app
+    provider:
+      host: db
+      port: "5432"
+      username: app
+      database: app
+      # Current password, read from .env. Keeping it here rather than in the
+      # rotator's own environment is what lets repeated rotations work.
+      password_env: POSTGRES_PASSWORD
+    schedule: "0 3 1 * *"
+    length: 32
+
+  # Redis rotation uses CONFIG SET requirepass + CONFIG REWRITE, so the server
+  # must have been started with a config file it can rewrite. The quickstart
+  # image is started with --requirepass on the command line, which Redis cannot
+  # rewrite; this entry is therefore left without a schedule and is here to show
+  # the shape of the configuration.
+  - name: redis_password
+    type: redis
+    env_key: REDIS_PASSWORD
+    env_file: .env
+    containers:
+      - cache
+      - app
+    provider:
+      host: cache
+      port: "6379"
+    length: 32

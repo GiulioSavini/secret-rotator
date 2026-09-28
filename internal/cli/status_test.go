@@ -125,7 +125,8 @@ func TestStatusCmd_HumanReadableAge(t *testing.T) {
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 	cmd.SetErr(new(bytes.Buffer))
-	cmd.SetArgs([]string{"--passphrase", passphrase, "--dir", dir})
+	useHistoryIn(t, dir)
+	cmd.SetArgs([]string{"--passphrase", passphrase})
 
 	err := cmd.Execute()
 	require.NoError(t, err)

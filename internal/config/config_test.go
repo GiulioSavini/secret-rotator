@@ -43,7 +43,8 @@ secrets:
 	assert.Equal(t, "db_password", s.Name)
 	assert.Equal(t, "mysql", s.Type)
 	assert.Equal(t, "MYSQL_ROOT_PASSWORD", s.EnvKey)
-	assert.Equal(t, ".env", s.EnvFile)
+	// Relative env paths are anchored to the config file's directory.
+	assert.Equal(t, filepath.Join(filepath.Dir(path), ".env"), s.EnvFile)
 	assert.Equal(t, []string{"mysql", "app"}, s.Containers)
 	assert.Equal(t, "localhost", s.Provider["host"])
 	assert.Equal(t, "0 3 * * 0", s.Schedule)
@@ -138,13 +139,22 @@ secrets:
       - docker/.env
     containers:
       - mysql
+    provider:
+      host: localhost
+      username: root
+      password_env: MYSQL_ROOT_PASSWORD
 `
 	path := writeTestConfig(t, yml)
 	cfg, err := Load(path)
 	require.NoError(t, err)
 	require.Len(t, cfg.Secrets, 1)
 
+	base := filepath.Dir(path)
 	s := cfg.Secrets[0]
-	assert.Equal(t, []string{".env", ".env.local", "docker/.env"}, s.EnvFiles)
+	assert.Equal(t, []string{
+		filepath.Join(base, ".env"),
+		filepath.Join(base, ".env.local"),
+		filepath.Join(base, "docker/.env"),
+	}, s.EnvFiles)
 	assert.Empty(t, s.EnvFile)
 }

@@ -44,6 +44,16 @@ func (e *Engine) Execute(ctx context.Context, secretCfg config.SecretConfig) err
 		Containers: secretCfg.Containers,
 	}
 
+	// Map Compose service names onto real container names up front, so that
+	// both the restart and any rollback act on the same resolved set.
+	if len(secretCfg.Containers) > 0 {
+		resolved, err := docker.ResolveContainerNames(ctx, e.docker, secretCfg.Containers)
+		if err != nil {
+			return fmt.Errorf("resolving containers for secret %s: %w", secretCfg.Name, err)
+		}
+		state.Containers = resolved
+	}
+
 	// Resolve env file paths
 	envFilePaths := resolveEnvFilePaths(secretCfg)
 	if len(envFilePaths) == 0 {
@@ -81,7 +91,7 @@ func (e *Engine) Execute(ctx context.Context, secretCfg config.SecretConfig) err
 
 	// --- StepGenerate: Call provider.Rotate ---
 	state.CurrentStep = StepGenerate
-	provCfg := buildProviderConfig(secretCfg)
+	provCfg := buildProviderConfig(secretCfg, ef)
 
 	result, err := e.provider.Rotate(ctx, provCfg, state.OldSecret)
 	if err != nil {
@@ -131,8 +141,8 @@ func (e *Engine) Execute(ctx context.Context, secretCfg config.SecretConfig) err
 
 	// --- StepRestart: Restart containers ---
 	state.CurrentStep = StepRestart
-	if len(secretCfg.Containers) > 0 {
-		if err := docker.RestartInOrder(ctx, e.docker, secretCfg.Containers, e.timeout); err != nil {
+	if len(state.Containers) > 0 {
+		if err := docker.RestartInOrder(ctx, e.docker, state.Containers, e.timeout); err != nil {
 			rollbackErr := rollback(ctx, state, e.provider, provCfg, e.docker, e.timeout)
 			e.recordFailure(state, err)
 			if rollbackErr != nil {
@@ -170,7 +180,7 @@ func (e *Engine) executeDryRun(_ context.Context, state *RotationState, secretCf
 		log.Printf("[DRY RUN] Would update env file: %s, key: %s", p, secretCfg.EnvKey)
 	}
 
-	for _, c := range secretCfg.Containers {
+	for _, c := range state.Containers {
 		log.Printf("[DRY RUN] Would restart container: %s", c)
 	}
 
@@ -223,9 +233,19 @@ func resolveEnvFilePaths(cfg config.SecretConfig) []string {
 }
 
 // buildProviderConfig converts SecretConfig.Provider map to a typed ProviderConfig.
-func buildProviderConfig(cfg config.SecretConfig) provider.ProviderConfig {
+//
+// The options map is copied rather than shared, because provider.password may
+// be filled in from the .env file below and the configuration must not be
+// mutated across rotations.
+func buildProviderConfig(cfg config.SecretConfig, ef *envfile.EnvFile) provider.ProviderConfig {
+	options := make(map[string]string, len(cfg.Provider)+1)
+	for k, v := range cfg.Provider {
+		options[k] = v
+	}
+	resolveAdminPassword(options, ef)
+
 	pc := provider.ProviderConfig{
-		Options: cfg.Provider,
+		Options: options,
 	}
 	if v, ok := cfg.Provider["host"]; ok {
 		pc.Host = v
@@ -242,4 +262,23 @@ func buildProviderConfig(cfg config.SecretConfig) provider.ProviderConfig {
 		pc.Database = v
 	}
 	return pc
+}
+
+// resolveAdminPassword fills in the admin password named by provider.password_env
+// from the .env file being rotated, falling back to the process environment.
+//
+// Reading the .env first matters when the admin credential is itself the secret
+// under rotation: a long-running daemon keeps the environment it started with,
+// so after the first rotation only the file holds the current value.
+func resolveAdminPassword(options map[string]string, ef *envfile.EnvFile) {
+	if options["password"] != "" {
+		return
+	}
+	envKey := options["password_env"]
+	if envKey == "" || ef == nil {
+		return
+	}
+	if v, ok := ef.Get(envKey); ok && v != "" {
+		options["password"] = v
+	}
 }

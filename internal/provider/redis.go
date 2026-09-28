@@ -91,7 +91,7 @@ func (r *RedisProvider) Rollback(ctx context.Context, cfg ProviderConfig, oldSec
 			Password: newSecret,
 		})
 		if err := client.Ping(ctx).Err(); err != nil {
-			client.Close();
+			client.Close()
 			return fmt.Errorf("redis: rollback cannot connect with either old or new password: %w", err)
 		}
 	}

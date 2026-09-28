@@ -6,14 +6,11 @@ import (
 	"log"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/giulio/secret-rotator/internal/config"
 	"github.com/giulio/secret-rotator/internal/docker"
 	"github.com/giulio/secret-rotator/internal/engine"
-	"github.com/giulio/secret-rotator/internal/history"
 	"github.com/giulio/secret-rotator/internal/notify"
-	"github.com/giulio/secret-rotator/internal/provider"
 	"github.com/giulio/secret-rotator/internal/scheduler"
 	"github.com/spf13/cobra"
 )
@@ -46,8 +43,8 @@ Stops gracefully on SIGINT or SIGTERM.`,
 }
 
 func runDaemon(cmd *cobra.Command, passphrase string) error {
-	if AppConfig == nil || len(AppConfig.Secrets) == 0 {
-		return fmt.Errorf("configuration required: use --config flag to specify rotator.yml with secrets")
+	if err := AppConfig.RequireSecrets(); err != nil {
+		return err
 	}
 
 	// Check that at least one secret has a schedule
@@ -59,12 +56,7 @@ func runDaemon(cmd *cobra.Command, passphrase string) error {
 		}
 	}
 
-	// Create provider registry
-	registry := provider.NewRegistry()
-	registry.Register(&provider.GenericProvider{})
-	registry.Register(&provider.MySQLProvider{})
-	registry.Register(&provider.PostgresProvider{})
-	registry.Register(&provider.RedisProvider{})
+	registry := newRegistry()
 
 	// Create Docker manager
 	dockerMgr, err := docker.NewSDKClient()
@@ -73,20 +65,9 @@ func runDaemon(cmd *cobra.Command, passphrase string) error {
 	}
 	defer dockerMgr.Close()
 
-	// Resolve passphrase and create history store
-	pp := resolvePassphrase(passphrase)
-	var histStore *history.Store
-	if pp != "" {
-		histStore = history.NewStore(".rotator/history.json", []byte(pp))
-	}
+	histStore := openHistoryStore(cmd, passphrase)
 
-	// Get dry-run flag from root persistent flags
-	dryRun := false
-	if cmd.Parent() != nil {
-		if dr, err := cmd.Parent().PersistentFlags().GetBool("dry-run"); err == nil {
-			dryRun = dr
-		}
-	}
+	dryRun := dryRunFlag
 
 	// Create notifiers from config
 	notifiers := notify.NewNotifiersFromConfig(AppConfig.Notifications)
@@ -98,7 +79,10 @@ func runDaemon(cmd *cobra.Command, passphrase string) error {
 		if err != nil {
 			return fmt.Errorf("resolving provider for type %q: %w", secretCfg.Type, err)
 		}
-		eng := engine.NewEngine(prov, dockerMgr, histStore, 30*time.Second, dryRun)
+		if err := applyDependencyOrder(cmd, AppConfig, &secretCfg); err != nil {
+			return err
+		}
+		eng := engine.NewEngine(prov, dockerMgr, histStore, defaultStepTimeout, dryRun)
 		return eng.Execute(ctx, secretCfg)
 	}
 

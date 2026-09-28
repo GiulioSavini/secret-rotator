@@ -5,12 +5,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/giulio/secret-rotator/internal/config"
 	"github.com/giulio/secret-rotator/internal/docker"
 	"github.com/giulio/secret-rotator/internal/engine"
 	"github.com/giulio/secret-rotator/internal/history"
 	"github.com/giulio/secret-rotator/internal/provider"
 	"github.com/spf13/cobra"
 )
+
+// defaultStepTimeout bounds each container restart and health check.
+const defaultStepTimeout = 30 * time.Second
 
 // NewRotateCmd creates the rotate subcommand.
 func NewRotateCmd() *cobra.Command {
@@ -32,69 +36,38 @@ func NewRotateCmd() *cobra.Command {
 }
 
 func runRotate(cmd *cobra.Command, secretName string, passphrase string) error {
-	// Validate config is loaded
-	if AppConfig == nil || len(AppConfig.Secrets) == 0 {
-		return fmt.Errorf("configuration required: use --config flag to specify rotator.yml")
+	if err := AppConfig.RequireSecrets(); err != nil {
+		return err
 	}
 
-	// Find the secret in config
-	var found bool
-	var secretIdx int
-	for i, s := range AppConfig.Secrets {
-		if s.Name == secretName {
-			found = true
-			secretIdx = i
-			break
-		}
-	}
-	if !found {
-		return fmt.Errorf("secret '%s' not found in configuration", secretName)
+	secretCfg, err := findSecret(AppConfig, secretName)
+	if err != nil {
+		return err
 	}
 
-	secretCfg := AppConfig.Secrets[secretIdx]
-
-	// Create provider registry and resolve provider
-	registry := provider.NewRegistry()
-	registry.Register(&provider.GenericProvider{})
-	registry.Register(&provider.MySQLProvider{})
-	registry.Register(&provider.PostgresProvider{})
-	registry.Register(&provider.RedisProvider{})
-
-	prov, err := registry.Get(secretCfg.Type)
+	prov, err := newRegistry().Get(secretCfg.Type)
 	if err != nil {
 		return fmt.Errorf("resolving provider for type %q: %w", secretCfg.Type, err)
 	}
 
-	// Create Docker manager
 	dockerMgr, err := docker.NewSDKClient()
 	if err != nil {
 		return fmt.Errorf("creating docker client: %w", err)
 	}
 	defer dockerMgr.Close()
 
-	// Resolve passphrase for history store
-	pp := resolvePassphrase(passphrase)
-	var histStore *history.Store
-	if pp != "" {
-		histStore = history.NewStore(".rotator/history.json", []byte(pp))
+	if err := applyDependencyOrder(cmd, AppConfig, &secretCfg); err != nil {
+		return err
 	}
 
-	// Get dry-run flag from root persistent flags
-	dryRun, _ := cmd.Flags().GetBool("dry-run")
-	if cmd.Parent() != nil {
-		if dr, err := cmd.Parent().PersistentFlags().GetBool("dry-run"); err == nil {
-			dryRun = dr
-		}
-	}
+	histStore := openHistoryStore(cmd, passphrase)
 
-	// Create and execute the engine
-	eng := engine.NewEngine(prov, dockerMgr, histStore, 30*time.Second, dryRun)
+	eng := engine.NewEngine(prov, dockerMgr, histStore, defaultStepTimeout, dryRunFlag)
 
 	if err := eng.Execute(cmd.Context(), secretCfg); err != nil {
 		return fmt.Errorf("rotation failed for %s: %w", secretName, err)
 	}
 
-	// Print success summary
 	containers := "none"
 	if len(secretCfg.Containers) > 0 {
 		containers = strings.Join(secretCfg.Containers, ", ")
@@ -102,5 +75,89 @@ func runRotate(cmd *cobra.Command, secretName string, passphrase string) error {
 	fmt.Fprintf(cmd.OutOrStdout(), "Successfully rotated %s (provider: %s, containers restarted: [%s])\n",
 		secretName, secretCfg.Type, containers)
 
+	return nil
+}
+
+// findSecret looks up a secret by name, listing the known names on failure.
+func findSecret(cfg *config.Config, name string) (config.SecretConfig, error) {
+	known := make([]string, 0, len(cfg.Secrets))
+	for _, s := range cfg.Secrets {
+		if s.Name == name {
+			return s, nil
+		}
+		known = append(known, s.Name)
+	}
+	where := "configuration"
+	if cfg.Path != "" {
+		where = cfg.Path
+	}
+	return config.SecretConfig{}, fmt.Errorf(
+		"secret '%s' not found in %s (defined: %s)", name, where, strings.Join(known, ", "))
+}
+
+// newRegistry builds the provider registry with every supported backend.
+func newRegistry() *provider.Registry {
+	registry := provider.NewRegistry()
+	registry.Register(&provider.GenericProvider{})
+	registry.Register(&provider.MySQLProvider{})
+	registry.Register(&provider.PostgresProvider{})
+	registry.Register(&provider.RedisProvider{})
+	return registry
+}
+
+// openHistoryStore returns the encrypted history store, or nil when no
+// passphrase is available. A missing passphrase disables the audit log rather
+// than blocking the rotation, so it is reported on stderr.
+func openHistoryStore(cmd *cobra.Command, passphrase string) *history.Store {
+	pp := resolvePassphrase(passphrase)
+	if pp == "" {
+		fmt.Fprintln(cmd.ErrOrStderr(),
+			"warning: no master passphrase (ROTATOR_MASTER_KEY); this rotation will not be recorded in the history")
+		return nil
+	}
+	return history.NewStore(historyPath(), []byte(pp))
+}
+
+// applyDependencyOrder reorders a secret's containers so that dependencies
+// restart before their dependents, using the project's Compose file.
+// A missing or unparsable Compose file leaves the configured order untouched.
+func applyDependencyOrder(cmd *cobra.Command, cfg *config.Config, secretCfg *config.SecretConfig) error {
+	if len(secretCfg.Containers) < 2 {
+		return nil
+	}
+
+	composePath, err := cfg.ResolveComposeFile()
+	if err != nil {
+		return err
+	}
+	if composePath == "" {
+		return nil
+	}
+
+	order, err := docker.LoadDependencyOrder(composePath)
+	if err != nil {
+		fmt.Fprintf(cmd.ErrOrStderr(),
+			"warning: could not derive restart order from %s (%v); using the configured order\n", composePath, err)
+		return nil
+	}
+
+	ordered := docker.FilterDependencyOrder(order, secretCfg.Containers)
+	// Keep any entry the Compose file does not know about (a plain container
+	// name, for instance) at the end rather than dropping it.
+	known := make(map[string]bool, len(ordered))
+	for _, name := range ordered {
+		known[name] = true
+	}
+	for _, name := range secretCfg.Containers {
+		if !known[name] {
+			ordered = append(ordered, name)
+		}
+	}
+
+	if verboseFlag {
+		fmt.Fprintf(cmd.ErrOrStderr(), "restart order from %s: %s\n",
+			composePath, strings.Join(ordered, " -> "))
+	}
+	secretCfg.Containers = ordered
 	return nil
 }

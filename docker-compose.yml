@@ -1,0 +1,44 @@
+# Drop this service into the Compose project whose secrets you want rotated.
+#
+# Setup, in full:
+#   1. run `rotator init` (or copy rotator.example.yml to rotator.yml) and edit it
+#   2. put ROTATOR_MASTER_KEY in this project's .env
+#   3. set DOCKER_GID below to the gid of the docker socket on this host:
+#        stat -c '%g' /var/run/docker.sock
+#   4. docker compose up -d rotator
+#
+# The rotator writes to the .env files in the project directory, so that mount
+# must stay writable.
+
+services:
+  rotator:
+    image: ghcr.io/giuliosavini/secret-rotator:latest
+    container_name: secret-rotator
+    restart: unless-stopped
+    command: ["daemon"]
+
+    volumes:
+      # The project directory: rotator.yml and the .env files it rotates.
+      # Must be writable.
+      - ./:/config
+      # Encrypted rotation history, kept outside the project.
+      - rotator-data:/data
+      # Read-only is enough: rotator only lists, inspects and restarts.
+      # For least privilege, point this at a socket proxy instead -- see README.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    environment:
+      # Passphrase for the encrypted audit log. Without it rotations still run,
+      # but nothing is recorded.
+      ROTATOR_MASTER_KEY: ${ROTATOR_MASTER_KEY:?set ROTATOR_MASTER_KEY in .env}
+
+    # The image runs as uid 65532 (nonroot). Joining the docker group is what
+    # grants access to the mounted socket.
+    group_add:
+      - "${DOCKER_GID:-999}"
+
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  rotator-data:

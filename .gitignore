@@ -10,6 +10,11 @@ rotator.yml
 *.key
 *.pem
 
+# ...but the shipped examples and templates are meant to be committed.
+!.env.example
+!examples/**/.env.example
+!examples/**/rotator.yml
+
 # IDE
 .vscode/
 .idea/

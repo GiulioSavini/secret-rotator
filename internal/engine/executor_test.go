@@ -61,12 +61,16 @@ type mockDockerManager struct {
 	restartFunc func(ctx context.Context, id string, timeout time.Duration) error
 	healthFunc  func(ctx context.Context, id string, timeout time.Duration) error
 
+	// containers is the inventory returned to container name resolution.
+	// Left empty, resolution passes the configured names straight through.
+	containers []docker.Container
+
 	restartCalls []string
 	healthCalls  []string
 }
 
 func (m *mockDockerManager) ListContainers(_ context.Context, _ docker.ContainerFilter) ([]docker.Container, error) {
-	return nil, nil
+	return m.containers, nil
 }
 func (m *mockDockerManager) InspectContainer(_ context.Context, _ string) (*docker.Container, error) {
 	return nil, nil

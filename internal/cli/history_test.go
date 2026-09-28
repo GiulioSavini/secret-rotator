@@ -17,11 +17,13 @@ import (
 func TestHistoryCmd_NoFile(t *testing.T) {
 	dir := t.TempDir()
 
+	useHistoryIn(t, dir)
+
 	cmd := NewHistoryCmd()
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 	cmd.SetErr(new(bytes.Buffer))
-	cmd.SetArgs([]string{"--passphrase", "test-pass", "--dir", dir})
+	cmd.SetArgs([]string{"--passphrase", "test-pass"})
 
 	// Bypass PersistentPreRunE which tries to load config
 	err := cmd.Execute()
@@ -53,11 +55,13 @@ func TestHistoryCmd_WithEntries(t *testing.T) {
 		Details:    "Connection refused",
 	}))
 
+	useHistoryIn(t, dir)
+
 	cmd := NewHistoryCmd()
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 	cmd.SetErr(new(bytes.Buffer))
-	cmd.SetArgs([]string{"--passphrase", passphrase, "--dir", dir})
+	cmd.SetArgs([]string{"--passphrase", passphrase})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
@@ -85,7 +89,8 @@ func TestHistoryCmd_NoPassphrase(t *testing.T) {
 	cmd.SetOut(buf)
 	errBuf := new(bytes.Buffer)
 	cmd.SetErr(errBuf)
-	cmd.SetArgs([]string{"--dir", t.TempDir()})
+	useHistoryIn(t, t.TempDir())
+	cmd.SetArgs([]string{})
 
 	err := cmd.Execute()
 	require.Error(t, err)
@@ -117,7 +122,8 @@ func TestHistoryCmd_Limit(t *testing.T) {
 	buf := new(bytes.Buffer)
 	cmd.SetOut(buf)
 	cmd.SetErr(new(bytes.Buffer))
-	cmd.SetArgs([]string{"--passphrase", passphrase, "--dir", dir, "--limit", "2"})
+	useHistoryIn(t, dir)
+	cmd.SetArgs([]string{"--passphrase", passphrase, "--limit", "2"})
 
 	err := cmd.Execute()
 	require.NoError(t, err)
