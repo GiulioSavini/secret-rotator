@@ -1,29 +1,55 @@
 version: 2
+
+# Each ecosystem produces at most one grouped pull request per week, instead of
+# one per dependency. Without grouping this repository accumulated six open
+# branches for six routine bumps.
+#
+# The groups deliberately cover version updates only. Security updates keep
+# arriving as their own pull request, so a fix never waits behind a batch of
+# unrelated bumps.
+
 updates:
   - package-ecosystem: gomod
     directory: /
     schedule:
       interval: weekly
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2
     labels:
       - dependencies
     commit-message:
       prefix: "chore(deps):"
+    groups:
+      go-modules:
+        applies-to: version-updates
+        patterns:
+          - "*"
 
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 2
     labels:
       - dependencies
     commit-message:
       prefix: "chore(deps):"
+    groups:
+      docker-images:
+        applies-to: version-updates
+        patterns:
+          - "*"
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 2
     labels:
       - dependencies
     commit-message:
       prefix: "chore(deps):"
+    groups:
+      github-actions:
+        applies-to: version-updates
+        patterns:
+          - "*"
