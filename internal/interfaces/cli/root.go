@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/giulio/secret-rotator/internal/infrastructure/configfile"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/configfile"
 	"github.com/spf13/cobra"
 )
 

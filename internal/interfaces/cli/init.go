@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/giulio/secret-rotator/internal/application"
-	"github.com/giulio/secret-rotator/internal/domain"
-	"github.com/giulio/secret-rotator/internal/infrastructure/configfile"
-	"github.com/giulio/secret-rotator/internal/infrastructure/container"
-	"github.com/giulio/secret-rotator/internal/infrastructure/envstore"
+	"github.com/GiulioSavini/secret-rotator/internal/application"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/configfile"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/container"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/envstore"
 	"github.com/spf13/cobra"
 )
 

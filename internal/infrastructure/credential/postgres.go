@@ -8,7 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // PostgresRotator changes a PostgreSQL role's password with ALTER ROLE.

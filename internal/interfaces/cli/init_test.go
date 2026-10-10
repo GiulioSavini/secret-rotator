@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/giulio/secret-rotator/internal/domain"
-	"github.com/giulio/secret-rotator/internal/infrastructure/configfile"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/configfile"
 )
 
 // runInitIn executes `rotator init` against dir and returns stdout.

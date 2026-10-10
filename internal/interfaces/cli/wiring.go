@@ -6,12 +6,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/giulio/secret-rotator/internal/application"
-	"github.com/giulio/secret-rotator/internal/domain"
-	"github.com/giulio/secret-rotator/internal/infrastructure/audit"
-	"github.com/giulio/secret-rotator/internal/infrastructure/container"
-	"github.com/giulio/secret-rotator/internal/infrastructure/credential"
-	"github.com/giulio/secret-rotator/internal/infrastructure/envstore"
+	"github.com/GiulioSavini/secret-rotator/internal/application"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/audit"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/container"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/credential"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/envstore"
 )
 
 // This file is the composition root: the single place where concrete adapters

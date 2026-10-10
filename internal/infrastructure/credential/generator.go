@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // Generator produces credentials from crypto/rand, encoded as URL-safe base64

@@ -1,10 +1,17 @@
 version: 2
 
+# The binary is called rotator while the repository is called secret-rotator,
+# so the project name is pinned: it drives the archive names the README's
+# install one-liner depends on.
+project_name: rotator
+
 builds:
   - main: ./cmd/rotator
     binary: rotator
     env:
       - CGO_ENABLED=0
+    flags:
+      - -trimpath
     goos:
       - linux
       - darwin
@@ -12,12 +19,18 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -s -w -X github.com/giulio/secret-rotator/internal/interfaces/cli.version={{.Version}} -X github.com/giulio/secret-rotator/internal/interfaces/cli.commit={{.Commit}} -X github.com/giulio/secret-rotator/internal/interfaces/cli.date={{.Date}}
+      - -s -w -X github.com/GiulioSavini/secret-rotator/internal/interfaces/cli.version={{.Version}} -X github.com/GiulioSavini/secret-rotator/internal/interfaces/cli.commit={{.Commit}} -X github.com/GiulioSavini/secret-rotator/internal/interfaces/cli.date={{.Date}}
 
 archives:
-  - format: tar.gz
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  # No version in the archive name, on purpose: it is what makes
+  #   releases/latest/download/rotator_linux_amd64.tar.gz
+  # resolvable. With the version in the name there is no stable URL to put in
+  # the README, because the caller would have to know the version first.
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
     files:
+      - README.md
+      - LICENSE
       - rotator.example.yml
 
 checksum:
@@ -33,7 +46,18 @@ changelog:
       - "^ci:"
       - "^chore:"
 
+# The owner and repository are taken from the git remote. They used to be
+# pinned to the wrong owner here, which would have published the release to a
+# repository that does not exist.
 release:
-  github:
-    owner: giulio
-    name: secret-rotator
+  prerelease: auto
+  footer: |
+    ## Install
+
+    ```bash
+    curl -L https://github.com/GiulioSavini/secret-rotator/releases/latest/download/rotator_linux_amd64.tar.gz | tar xz
+    ./rotator scan
+    ./rotator init
+    ```
+
+    Container image: `ghcr.io/giuliosavini/secret-rotator:{{ .Version }}`

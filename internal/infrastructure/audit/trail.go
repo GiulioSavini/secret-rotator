@@ -3,7 +3,7 @@ package audit
 import (
 	"context"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // Trail is the encrypted implementation of domain.AuditTrail.

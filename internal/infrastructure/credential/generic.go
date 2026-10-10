@@ -3,7 +3,7 @@ package credential
 import (
 	"context"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // GenericRotator handles secrets with no backing service: API keys, JWT

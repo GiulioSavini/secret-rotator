@@ -3,7 +3,7 @@ package application
 import (
 	"fmt"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // ScanSecrets audits the credentials found in a set of .env files.

@@ -9,9 +9,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/giulio/secret-rotator/internal/application"
-	"github.com/giulio/secret-rotator/internal/domain"
-	"github.com/giulio/secret-rotator/internal/infrastructure/envstore"
+	"github.com/GiulioSavini/secret-rotator/internal/application"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/envstore"
 )
 
 // NewScanCmd creates the scan subcommand.

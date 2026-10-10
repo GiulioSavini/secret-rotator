@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // systemClock is the default Clock, reading the wall clock in UTC so that

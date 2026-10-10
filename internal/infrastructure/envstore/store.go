@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // Store is the filesystem-backed implementation of domain.EnvStore.

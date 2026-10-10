@@ -14,9 +14,9 @@ import (
 
 	"github.com/robfig/cron/v3"
 
-	"github.com/giulio/secret-rotator/internal/domain"
-	"github.com/giulio/secret-rotator/internal/infrastructure/container"
-	"github.com/giulio/secret-rotator/internal/infrastructure/notifier"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/container"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/notifier"
 )
 
 // RotateFunc runs one rotation. It is the use case, injected rather than

@@ -1,4 +1,4 @@
-module github.com/giulio/secret-rotator
+module github.com/GiulioSavini/secret-rotator
 
 go 1.26.2
 

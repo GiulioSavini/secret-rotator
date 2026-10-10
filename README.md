@@ -9,8 +9,11 @@ order, and rolls back if anything fails.
 ## Quick start
 
 ```bash
-# 1. Get the binary
+# 1. Get the binary (linux_arm64, darwin_amd64 and darwin_arm64 are also published)
 curl -L https://github.com/GiulioSavini/secret-rotator/releases/latest/download/rotator_linux_amd64.tar.gz | tar xz
+
+# ...or build it yourself
+go install github.com/GiulioSavini/secret-rotator/cmd/rotator@latest
 
 # 2. See what you have
 cd /path/to/your/project

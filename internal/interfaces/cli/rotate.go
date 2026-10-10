@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/giulio/secret-rotator/internal/domain"
-	"github.com/giulio/secret-rotator/internal/infrastructure/configfile"
-	"github.com/giulio/secret-rotator/internal/infrastructure/container"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/configfile"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/container"
 )
 
 // NewRotateCmd creates the rotate subcommand.

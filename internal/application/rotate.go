@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // RotateSecret is the use case behind `rotator rotate` and every scheduled

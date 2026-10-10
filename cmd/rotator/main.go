@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/giulio/secret-rotator/internal/interfaces/cli"
+	"github.com/GiulioSavini/secret-rotator/internal/interfaces/cli"
 )
 
 func main() {

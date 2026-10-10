@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/giulio/secret-rotator/internal/infrastructure/audit"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/audit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

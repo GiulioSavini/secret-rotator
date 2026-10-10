@@ -7,7 +7,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/giulio/secret-rotator/internal/infrastructure/configfile"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/configfile"
 )
 
 // Event represents a rotation event to be sent via webhook.

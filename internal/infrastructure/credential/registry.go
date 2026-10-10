@@ -3,7 +3,7 @@ package credential
 import (
 	"fmt"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // Registry resolves a secret kind to the rotator that handles it.

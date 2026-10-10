@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // This file is the anti-corruption layer between the YAML file and the model.

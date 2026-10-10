@@ -9,10 +9,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/giulio/secret-rotator/internal/domain"
-	"github.com/giulio/secret-rotator/internal/infrastructure/container"
-	"github.com/giulio/secret-rotator/internal/infrastructure/notifier"
-	"github.com/giulio/secret-rotator/internal/infrastructure/scheduling"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/container"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/notifier"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/scheduling"
 )
 
 // NewDaemonCmd creates the daemon subcommand that runs scheduled rotations.

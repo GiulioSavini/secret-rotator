@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const modulePath = "github.com/giulio/secret-rotator"
+const modulePath = "github.com/GiulioSavini/secret-rotator"
 
 // layer describes what one layer of the module is allowed to import.
 type layer struct {

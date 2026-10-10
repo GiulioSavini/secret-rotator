@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // DefaultStepTimeout bounds one container restart and its health check.

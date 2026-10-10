@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/giulio/secret-rotator/internal/domain"
+	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
 
 // PlanRotation answers "what would happen if I rotated this?" without

@@ -5,7 +5,7 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/giulio/secret-rotator/internal/infrastructure/audit"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/audit"
 	"github.com/spf13/cobra"
 )
 

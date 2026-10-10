@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/giulio/secret-rotator/internal/infrastructure/crypto"
+	"github.com/GiulioSavini/secret-rotator/internal/infrastructure/crypto"
 )
 
 // Store manages an encrypted history file on disk. It caches the derived key
