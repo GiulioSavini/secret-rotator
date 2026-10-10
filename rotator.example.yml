@@ -41,6 +41,12 @@ secrets:
       # Compose stacks normally define them.
       # target_user_host: "%"
     schedule: "0 3 1 * *"   # 03:00 on the 1st of each month
+    # Rotation policy. A schedule says *when* to rotate; max_age says what
+    # must be true. The daemon rotates anything past it, which survives the
+    # daemon being down over the date the schedule would have fired, and
+    # `rotator status --overdue` reports it. Units: d, w, h, m, s.
+    # Requires a master passphrase, because ages come from the history.
+    max_age: 100d
     length: 32              # bytes of entropy, base64-encoded
 
   # --- PostgreSQL ----------------------------------------------------------
@@ -61,6 +67,7 @@ secrets:
       password_env: POSTGRES_PASSWORD
       # target_user: app_user
     schedule: "0 3 1 * *"
+    max_age: 100d
     length: 32
 
   # --- Redis ---------------------------------------------------------------
@@ -91,6 +98,9 @@ secrets:
       - .env.local
     containers:
       - app
+    # No schedule: this one rotates purely on policy, whenever the daemon
+    # finds it older than 90 days.
+    max_age: 90d
     length: 48
 
 # Optional webhook targets, notified on every rotation outcome.

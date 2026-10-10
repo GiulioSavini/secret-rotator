@@ -28,6 +28,7 @@ type runtime struct {
 	env       domain.EnvStore
 	fleet     domain.ContainerFleet
 	audit     domain.AuditTrail
+	history   domain.RotationHistory
 	reporter  domain.Reporter
 
 	closers []func()
@@ -77,17 +78,43 @@ func newRuntime(cmd *cobra.Command, opts runtimeOptions) (*runtime, error) {
 	}
 
 	if opts.passphrase != "" {
-		store := audit.NewStore(historyPath(), []byte(opts.passphrase))
-		// keepPreviousValue mirrors the historical behaviour of the audit log.
-		// Set ROTATOR_AUDIT_OMIT_PREVIOUS=1 to stop archiving replaced
-		// credentials, at the cost of losing the ability to recover one.
-		rt.audit = audit.NewTrail(store, os.Getenv("ROTATOR_AUDIT_OMIT_PREVIOUS") == "")
+		history := newHistory(opts.passphrase)
+		rt.audit = history
+		rt.history = history
 	} else {
 		fmt.Fprintln(cmd.ErrOrStderr(),
 			"warning: no master passphrase (ROTATOR_MASTER_KEY); rotations will not be recorded in the history")
 	}
 
 	return rt, nil
+}
+
+// newHistory builds the encrypted rotation log, which is both the audit trail
+// and the source of truth for how old each credential is.
+//
+// keepPreviousValue mirrors the historical behaviour of the log. Set
+// ROTATOR_AUDIT_OMIT_PREVIOUS=1 to stop archiving replaced credentials, at the
+// cost of losing the ability to recover one.
+func newHistory(passphrase string) *audit.History {
+	store := audit.NewStore(historyPath(), []byte(passphrase))
+	trail := audit.NewTrail(store, os.Getenv("ROTATOR_AUDIT_OMIT_PREVIOUS") == "")
+	return audit.NewHistory(store, trail)
+}
+
+// openHistory returns the rotation history for read-only commands, or nil when
+// no passphrase is available. A nil history is meaningful: the compliance check
+// reports "unknown" rather than pretending every policy is met.
+func openHistory(passphrase string) domain.RotationHistory {
+	pp := resolvePassphrase(passphrase)
+	if pp == "" {
+		return nil
+	}
+	return newHistory(pp)
+}
+
+// complianceUseCase builds the policy check from the assembled adapters.
+func (r *runtime) complianceUseCase() *application.CheckCompliance {
+	return application.NewCheckCompliance(r.history, application.SystemClock())
 }
 
 // rotateUseCase builds the rotation use case from the assembled adapters.

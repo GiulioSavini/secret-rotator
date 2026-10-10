@@ -47,5 +47,5 @@ func TestDaemonCmd_RequiresSchedules(t *testing.T) {
 	cmd := NewDaemonCmd()
 	err := cmd.RunE(cmd, nil)
 	assert.Error(t, err, "daemon should fail without any schedules")
-	assert.Contains(t, err.Error(), "no schedules found")
+	assert.Contains(t, err.Error(), "nothing to do")
 }

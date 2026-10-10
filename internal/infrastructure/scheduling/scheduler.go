@@ -27,12 +27,29 @@ type RotateFunc func(ctx context.Context, secret *domain.Secret) error
 // block the schedule forever.
 const JobTimeout = 10 * time.Minute
 
+// lockTable serialises rotations per secret.
+//
+// It is shared between the cron scheduler and the policy runner, so a
+// scheduled trigger and a max_age check can never rotate the same secret
+// concurrently: two overlapping ALTER USER statements on one account would
+// race, and the loser would leave .env and the server disagreeing.
+type lockTable struct {
+	locks sync.Map // secret name -> *sync.Mutex
+}
+
+func newLockTable() *lockTable { return &lockTable{} }
+
+func (t *lockTable) get(name domain.SecretName) *sync.Mutex {
+	val, _ := t.locks.LoadOrStore(name.String(), &sync.Mutex{})
+	return val.(*sync.Mutex)
+}
+
 // Scheduler runs rotations on cron schedules.
 type Scheduler struct {
 	cron       *cron.Cron
 	rotate     RotateFunc
 	dispatcher *notifier.Dispatcher
-	locks      sync.Map // secret name -> *sync.Mutex
+	locks      *lockTable
 }
 
 // Parser accepts standard 5-field expressions plus descriptors like @daily.
@@ -46,48 +63,50 @@ func NewScheduler(rotate RotateFunc, dispatcher *notifier.Dispatcher) *Scheduler
 		cron:       cron.New(cron.WithParser(Parser())),
 		rotate:     rotate,
 		dispatcher: dispatcher,
+		locks:      newLockTable(),
 	}
 }
 
-// getLock returns the mutex guarding one secret.
-func (s *Scheduler) getLock(name domain.SecretName) *sync.Mutex {
-	val, _ := s.locks.LoadOrStore(name.String(), &sync.Mutex{})
-	return val.(*sync.Mutex)
+// Execute runs one rotation under the secret's lock and notifies the
+// configured targets with the outcome.
+//
+// Both trigger paths go through here -- a cron entry and a max_age check --
+// so they cannot overlap on the same secret and they report identically.
+// trigger names the origin, for the log line.
+func (s *Scheduler) Execute(ctx context.Context, secret *domain.Secret, trigger string) {
+	name := secret.Name()
+
+	mu := s.locks.get(name)
+	if !mu.TryLock() {
+		log.Printf("[%s] skipping %s: a rotation is already in progress", trigger, name)
+		return
+	}
+	defer mu.Unlock()
+
+	runCtx, cancel := context.WithTimeout(ctx, JobTimeout)
+	defer cancel()
+
+	err := s.rotate(runCtx, secret)
+
+	event := notifier.Event{SecretName: name.String(), Timestamp: time.Now()}
+	if err != nil {
+		event.Status = string(domain.OutcomeFailed)
+		event.Details = err.Error()
+		log.Printf("[%s] rotation failed for %s: %v", trigger, name, err)
+	} else {
+		event.Status = string(domain.OutcomeSuccess)
+		log.Printf("[%s] rotation succeeded for %s", trigger, name)
+	}
+
+	if sendErr := s.dispatcher.Send(runCtx, event); sendErr != nil {
+		log.Printf("[%s] notification error for %s: %v", trigger, name, sendErr)
+	}
 }
 
 // jobFunc builds the closure a cron entry runs.
 func (s *Scheduler) jobFunc(secret *domain.Secret) func() {
 	return func() {
-		name := secret.Name()
-
-		// A rotation that overruns its schedule must not overlap with the
-		// next tick: two concurrent ALTER USER statements on the same account
-		// would race, and the loser would leave .env and the server disagreeing.
-		mu := s.getLock(name)
-		if !mu.TryLock() {
-			log.Printf("[scheduler] skipping %s: a rotation is already in progress", name)
-			return
-		}
-		defer mu.Unlock()
-
-		ctx, cancel := context.WithTimeout(context.Background(), JobTimeout)
-		defer cancel()
-
-		err := s.rotate(ctx, secret)
-
-		event := notifier.Event{SecretName: name.String(), Timestamp: time.Now()}
-		if err != nil {
-			event.Status = string(domain.OutcomeFailed)
-			event.Details = err.Error()
-			log.Printf("[scheduler] rotation failed for %s: %v", name, err)
-		} else {
-			event.Status = string(domain.OutcomeSuccess)
-			log.Printf("[scheduler] rotation succeeded for %s", name)
-		}
-
-		if sendErr := s.dispatcher.Send(ctx, event); sendErr != nil {
-			log.Printf("[scheduler] notification error for %s: %v", name, sendErr)
-		}
+		s.Execute(context.Background(), secret, "scheduler")
 	}
 }
 

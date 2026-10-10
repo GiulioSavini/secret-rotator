@@ -77,6 +77,19 @@ type AuditTrail interface {
 	Record(ctx context.Context, record Record) error
 }
 
+// RotationHistory answers when a secret was last rotated successfully.
+//
+// It is separate from AuditTrail because writing an outcome and querying past
+// outcomes are different capabilities with different availability: a rotation
+// runs happily without an audit trail, but a max-age policy cannot be
+// evaluated without reading one. Keeping them apart lets the code that needs
+// history say so.
+type RotationHistory interface {
+	// LastSuccess returns when the named secret last rotated successfully.
+	// The boolean is false when no successful rotation is on record.
+	LastSuccess(ctx context.Context, name SecretName) (time.Time, bool, error)
+}
+
 // Clock supplies the current time, so that rotation timestamps are
 // deterministic under test.
 type Clock interface {

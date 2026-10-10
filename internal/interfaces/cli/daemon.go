@@ -2,10 +2,13 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -87,17 +90,49 @@ func runDaemon(cmd *cobra.Command, passphrase string) error {
 		scheduled += fromLabels
 	}
 
-	if scheduled == 0 {
+	// A max_age policy is a second, independent reason to rotate, so a secret
+	// with only max_age and no cron expression is a valid configuration.
+	withPolicy := 0
+	for _, secret := range secrets {
+		if secret.MaxAge().IsSet() {
+			withPolicy++
+		}
+	}
+
+	if scheduled == 0 && withPolicy == 0 {
 		return fmt.Errorf(
-			"no schedules found: add a 'schedule:' to a secret in %s, or a com.secret-rotator.schedule label to a container",
+			"nothing to do: add a 'schedule:' or a 'max_age:' to a secret in %s, "+
+				"or a com.secret-rotator.schedule label to a container",
 			AppConfig.Path)
 	}
 
-	sched.Start()
-	log.Printf("[daemon] started with %d scheduled rotation(s)", scheduled)
-
 	ctx, stop := signal.NotifyContext(cmd.Context(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+
+	if withPolicy > 0 {
+		if rt.history == nil {
+			return fmt.Errorf(
+				"%d secret(s) define max_age, but ages come from the encrypted rotation history: "+
+					"set ROTATOR_MASTER_KEY (or pass --passphrase) so the policy can be evaluated",
+				withPolicy)
+		}
+
+		compliance := rt.complianceUseCase()
+		due := func(ctx context.Context) ([]*domain.Secret, error) {
+			report := compliance.Execute(ctx, secrets)
+			if !report.HistoryReadable {
+				return nil, errors.New(report.Reason)
+			}
+			return report.DueForRotation(), nil
+		}
+
+		policy := scheduling.NewPolicyRunner(due, sched, policyInterval())
+		go policy.Run(ctx)
+	}
+
+	sched.Start()
+	log.Printf("[daemon] started with %d scheduled rotation(s) and %d max_age policy/policies",
+		scheduled, withPolicy)
 
 	<-ctx.Done()
 	log.Printf("[daemon] shutdown signal received, waiting for running rotations...")
@@ -106,6 +141,22 @@ func runDaemon(cmd *cobra.Command, passphrase string) error {
 	log.Printf("[daemon] stopped")
 
 	return nil
+}
+
+// policyInterval returns how often max_age policies are re-evaluated.
+// ROTATOR_POLICY_INTERVAL overrides the default, mainly so the behaviour can
+// be exercised without waiting an hour.
+func policyInterval() time.Duration {
+	raw := os.Getenv("ROTATOR_POLICY_INTERVAL")
+	if raw == "" {
+		return scheduling.DefaultPolicyInterval
+	}
+	d, err := time.ParseDuration(raw)
+	if err != nil || d <= 0 {
+		log.Printf("[daemon] ignoring invalid ROTATOR_POLICY_INTERVAL %q", raw)
+		return scheduling.DefaultPolicyInterval
+	}
+	return d
 }
 
 // readScheduleLabels opens its own Docker connection, because label discovery

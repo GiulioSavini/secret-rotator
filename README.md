@@ -2,9 +2,12 @@
 
 Secret rotation for self-hosted Docker environments.
 
-Discovers secrets in `.env` files, rotates them on schedule or on demand,
-updates the backing service, restarts the affected containers in dependency
-order, and rolls back if anything fails.
+Discovers secrets in `.env` files, rotates them on schedule, on policy or on
+demand, updates the backing service, restarts the affected containers in
+dependency order, and rolls back if anything fails.
+
+Rotation policies are expressed as a maximum age ("no credential older than 90
+days"), and `rotator status --overdue` turns that into a monitoring check.
 
 ## Quick start
 
@@ -128,9 +131,12 @@ Restart order comes from `depends_on` in your Compose file, which is
 auto-discovered next to `rotator.yml` (override with `compose_file:`). Without
 one, the order you wrote in `containers:` is used as-is.
 
-### Scheduling
+### When rotation happens
 
-Cron expressions in `secrets[].schedule`, or on container labels:
+Two independent triggers. A secret can use either, or both.
+
+**A schedule** says *when* to rotate — a cron expression in
+`secrets[].schedule`, or on a container label:
 
 ```yaml
 labels:
@@ -138,7 +144,45 @@ labels:
   - "com.secret-rotator.mysql_root_password.schedule=0 0 */7 * *"
 ```
 
-`rotator daemon` runs them in the foreground and stops on SIGINT/SIGTERM.
+**A policy** says what must be *true* — `max_age`, in `d`, `w`, `h`, `m` or
+`s`:
+
+```yaml
+secrets:
+  - name: mysql_root_password
+    max_age: 90d        # no credential older than 90 days
+```
+
+The difference matters when the daemon is not running on the day the cron
+expression would have fired: a schedule silently skips that month, a policy
+notices and rotates on the next check (hourly by default,
+`ROTATOR_POLICY_INTERVAL` to change it). A secret with only `max_age` and no
+schedule is a complete configuration.
+
+`rotator daemon` runs both in the foreground and stops on SIGINT/SIGTERM.
+Rotations of the same secret never overlap, whichever trigger fired.
+
+### Monitoring the policy
+
+`rotator status` shows the age of each credential, the policy it has to meet,
+and whether it meets it. `--overdue` narrows it to what needs attention and
+exits with a dedicated code, so it drops straight into monitoring or a CI
+gate:
+
+```bash
+rotator status --overdue    # 0 = all within policy, 2 = something is not
+```
+
+| Exit code | Meaning |
+|-----------|---------|
+| `0` | every secret is within its `max_age` |
+| `1` | the command failed (bad config, unreachable service, ...) |
+| `2` | at least one secret needs attention |
+
+Ages come from the encrypted rotation history, so evaluating a policy needs
+`ROTATOR_MASTER_KEY`. Without it the state is reported as `unknown` and the
+check still exits non-zero: a policy that cannot be evaluated is not a policy
+that has been met.
 
 ## Commands
 
@@ -147,14 +191,15 @@ labels:
 | `rotator init [dir]` | Generate a `rotator.yml` from `.env` files and running containers |
 | `rotator scan [dir]` | Discover secrets and audit password strength |
 | `rotator rotate <name>` | Rotate one secret on demand |
-| `rotator status` | Secret states, ages and next rotation times |
+| `rotator status` | Ages, policies, compliance and next rotation times |
 | `rotator history` | Decrypt and show the rotation audit log |
 | `rotator daemon` | Run scheduled rotations in the foreground |
 | `rotator version` | Version information |
 
 Global flags: `--config`, `--data-dir`, `--dry-run`, `--verbose`.
 
-Environment: `ROTATOR_CONFIG`, `ROTATOR_DATA_DIR`, `ROTATOR_MASTER_KEY`.
+Environment: `ROTATOR_CONFIG`, `ROTATOR_DATA_DIR`, `ROTATOR_MASTER_KEY`,
+`ROTATOR_POLICY_INTERVAL`, `ROTATOR_AUDIT_OMIT_PREVIOUS`.
 
 ## Security
 

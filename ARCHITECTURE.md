@@ -57,6 +57,12 @@ code downstream re-checks them.
 **`Target`** replaces the untyped option bag: connection details, plus the
 defaulting rules for port, target account and account host.
 
+**`MaxAge`** and **`Standing`** carry the rotation policy: a maximum age, and
+a secret's evaluated state against it. Deciding that an unevaluable policy is
+*not* a met policy, and that "never rotated" needs the same action as "too
+old", are domain rules, so they live here rather than in the command that
+prints them.
+
 **`Rotation`** is the entity that tracks one attempt. Every mutating step
 records what it needs to undo, and `CompensationPlan()` turns that journal into
 the ordered list of undo actions. Deciding *what* to roll back is a domain
@@ -79,6 +85,9 @@ Use cases. Ordering and error handling, no rules and no mechanics.
   boolean inside the write path, where the two could drift; it is now a
   separate read-only use case returning a value the caller renders.
 - **`ScanSecrets`** audits the credentials in a set of files.
+- **`CheckCompliance`** evaluates every secret against its `max_age`. It is
+  the read side of policy-driven rotation: `status` renders it, and the daemon
+  uses it to decide what to rotate without being given a cron expression.
 
 ## infrastructure
 
@@ -90,10 +99,10 @@ it with a compile-time assertion.
 | `credential` | `CredentialRotator`, `PasswordGenerator`, `RotatorRegistry` | one rotator per kind; generation is separate from application |
 | `container` | `ContainerFleet` | Docker SDK, Compose service resolution, dependency ordering |
 | `envstore` | `EnvStore`, `EnvDocument` | atomic, permission-preserving writes |
-| `audit` | `AuditTrail` | AES-256-GCM + Argon2id |
+| `audit` | `AuditTrail`, `RotationHistory` | AES-256-GCM + Argon2id; reads are cached, since each one costs a key derivation |
 | `configfile` | — | the anti-corruption layer: YAML in, `*domain.Secret` out |
 | `notifier` | — | Slack, Discord, generic webhooks |
-| `scheduling` | — | driving adapter: decides *when* a use case runs |
+| `scheduling` | — | driving adapter: cron entries and the max-age policy runner, sharing one per-secret lock |
 | `crypto` | — | encryption primitives used by `audit` |
 
 ## interfaces/cli

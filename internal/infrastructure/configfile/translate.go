@@ -77,6 +77,7 @@ func (c *Config) specFor(index int, sc SecretConfig) (domain.SecretSpec, error) 
 		Containers: sc.Containers,
 		Target:     target,
 		Schedule:   sc.Schedule,
+		MaxAge:     sc.MaxAge,
 		Length:     length,
 	}, nil
 }

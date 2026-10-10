@@ -17,6 +17,7 @@ type Secret struct {
 	containers []ContainerRef
 	target     Target
 	schedule   Schedule
+	maxAge     MaxAge
 	length     PasswordLength
 }
 
@@ -31,6 +32,7 @@ type SecretSpec struct {
 	Containers []string
 	Target     Target
 	Schedule   string
+	MaxAge     string
 	Length     int
 }
 
@@ -64,6 +66,11 @@ func NewSecret(spec SecretSpec) (secret *Secret, warnings []string, err error) {
 		return nil, nil, fmt.Errorf("secret %q: %w", name, err)
 	}
 
+	maxAge, err := ParseMaxAge(spec.MaxAge)
+	if err != nil {
+		return nil, nil, fmt.Errorf("secret %q: %w", name, err)
+	}
+
 	targetWarnings, err := spec.Target.validateFor(kind, name)
 	if err != nil {
 		return nil, nil, err
@@ -86,6 +93,7 @@ func NewSecret(spec SecretSpec) (secret *Secret, warnings []string, err error) {
 		containers: containers,
 		target:     spec.Target,
 		schedule:   NewSchedule(spec.Schedule),
+		maxAge:     maxAge,
 		length:     length,
 	}, targetWarnings, nil
 }
@@ -169,6 +177,9 @@ func (s *Secret) WithSchedule(sc Schedule) *Secret {
 	clone.schedule = sc
 	return &clone
 }
+
+// MaxAge returns the rotation policy, which may be unset.
+func (s *Secret) MaxAge() MaxAge { return s.maxAge }
 
 // Length returns the entropy, in bytes, of the value to generate.
 func (s *Secret) Length() PasswordLength { return s.length }

@@ -53,6 +53,7 @@ type SecretConfig struct {
 	Containers []string          `koanf:"containers"`
 	Provider   map[string]string `koanf:"provider"`
 	Schedule   string            `koanf:"schedule"`
+	MaxAge     string            `koanf:"max_age"`
 	Length     int               `koanf:"length"`
 }
 
