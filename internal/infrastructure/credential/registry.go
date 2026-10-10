@@ -18,6 +18,7 @@ func NewRegistry() *Registry {
 	r.Register(&MySQLRotator{})
 	r.Register(&PostgresRotator{})
 	r.Register(&RedisRotator{})
+	r.Register(&CommandRotator{})
 	return r
 }
 

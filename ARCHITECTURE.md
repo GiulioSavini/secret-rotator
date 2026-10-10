@@ -96,7 +96,7 @@ it with a compile-time assertion.
 
 | Package | Implements | Notes |
 |---------|-----------|-------|
-| `credential` | `CredentialRotator`, `PasswordGenerator`, `RotatorRegistry` | one rotator per kind; generation is separate from application |
+| `credential` | `CredentialRotator`, `PasswordGenerator`, `RotatorRegistry` | one rotator per kind; generation is separate from application. The `command` rotator runs configured programs: argv only, credentials via the environment, no inherited environment, whole-process-tree timeout |
 | `container` | `ContainerFleet` | Docker SDK, Compose service resolution, dependency ordering |
 | `envstore` | `EnvStore`, `EnvDocument` | atomic, permission-preserving writes |
 | `audit` | `AuditTrail`, `RotationHistory` | AES-256-GCM + Argon2id; reads are cached, since each one costs a key derivation |
@@ -117,6 +117,9 @@ a change there and nowhere else.
 1. Implement `domain.CredentialRotator` in `internal/infrastructure/credential`.
 2. Add the kind and its traits to `kinds` in `internal/domain/kind.go`.
 3. Register the rotator in `credential.NewRegistry`.
+
+For a one-off service it is usually not worth it: `type: command` already
+covers anything that can be rotated by a script.
 
 Nothing else changes: validation, defaulting, the pipeline, compensation and
 the CLI all work off the kind's traits.

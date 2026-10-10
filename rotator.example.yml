@@ -103,6 +103,35 @@ secrets:
     max_age: 90d
     length: 48
 
+  # --- Command ------------------------------------------------------------
+  # Delegates to programs, for anything without a built-in provider: MinIO,
+  # RabbitMQ, Keycloak, Grafana, an SSH authorized_keys file, an HTTP token
+  # endpoint. See examples/command-provider/ for a working script.
+  - name: minio_secret_key
+    type: command
+    env_key: MINIO_SECRET_KEY
+    env_file: .env
+    containers:
+      - app
+    command:
+      # argv lists, never shell strings: there is no shell, so nothing to
+      # inject into. Relative program paths resolve against this file.
+      apply: ["./hooks/rotate-minio.sh", "apply"]
+      # Optional. Without it the new value is written to the .env files
+      # without ever being proven to work.
+      verify: ["./hooks/rotate-minio.sh", "verify"]
+      # Optional. Without it a failed rotation is undone by running apply
+      # again with the previous value, which is right when apply is
+      # idempotent. Set it when it is not.
+      # restore: ["./hooks/rotate-minio.sh", "restore"]
+      timeout: 60s
+      # rotator's environment is NOT inherited, so the master passphrase
+      # cannot leak into the script. List what the script genuinely needs.
+      pass_env:
+        - MINIO_ALIAS
+    max_age: 90d
+    length: 40
+
 # Optional webhook targets, notified on every rotation outcome.
 # notifications:
 #   - type: slack

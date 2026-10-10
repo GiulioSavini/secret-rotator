@@ -2,9 +2,12 @@ package configfile
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
@@ -134,6 +137,12 @@ func (c *Config) targetFor(index int, sc SecretConfig) (domain.Target, int, erro
 		length = parsed
 	}
 
+	command, err := c.commandFor(index, sc)
+	if err != nil {
+		return domain.Target{}, 0, err
+	}
+	target.Command = command
+
 	if key := placeholderKey(sc); key != "" {
 		return domain.Target{}, 0, fmt.Errorf(
 			"secrets[%d] %q: %s is still the TODO placeholder left by 'rotator init'; replace it with a real value",
@@ -141,6 +150,74 @@ func (c *Config) targetFor(index int, sc SecretConfig) (domain.Target, int, erro
 	}
 
 	return target, length, nil
+}
+
+// commandFor translates a secret's command block.
+//
+// Relative program paths and the working directory are anchored to the
+// configuration file, the same rule the .env paths follow, so a script path
+// means the same thing to a manual run and to the daemon.
+func (c *Config) commandFor(index int, sc SecretConfig) (domain.CommandSpec, error) {
+	if !sc.Command.IsSet() && sc.Command.Timeout == "" && len(sc.Command.PassEnv) == 0 && sc.Command.WorkDir == "" {
+		return domain.CommandSpec{}, nil
+	}
+
+	spec := domain.CommandSpec{
+		Apply:   anchorProgram(c.Dir(), sc.Command.Apply),
+		Verify:  anchorProgram(c.Dir(), sc.Command.Verify),
+		Restore: anchorProgram(c.Dir(), sc.Command.Restore),
+		PassEnv: sc.Command.PassEnv,
+	}
+
+	spec.WorkingDir = sc.Command.WorkDir
+	if spec.WorkingDir == "" {
+		spec.WorkingDir = c.Dir()
+	} else if !filepath.IsAbs(spec.WorkingDir) {
+		spec.WorkingDir = filepath.Join(c.Dir(), spec.WorkingDir)
+	}
+
+	if raw := strings.TrimSpace(sc.Command.Timeout); raw != "" {
+		d, err := time.ParseDuration(raw)
+		if err != nil {
+			return domain.CommandSpec{}, fmt.Errorf(
+				"secrets[%d] %q: command.timeout %q is not a duration (e.g. 60s, 2m)", index, sc.Name, raw)
+		}
+		spec.Timeout = d
+	}
+
+	// A program that is named by path and is not there yet is worth saying out
+	// loud: the alternative is discovering it at 3am when the policy fires.
+	for _, argv := range [][]string{spec.Apply, spec.Verify, spec.Restore} {
+		if len(argv) == 0 {
+			continue
+		}
+		if !strings.ContainsRune(argv[0], filepath.Separator) {
+			continue // looked up on PATH at run time
+		}
+		if _, err := os.Stat(argv[0]); err != nil {
+			c.Warnings = append(c.Warnings, fmt.Sprintf(
+				"secret %q: command program %s is not present right now", sc.Name, argv[0]))
+		}
+	}
+
+	return spec, nil
+}
+
+// anchorProgram resolves a relative program path against the configuration's
+// directory, leaving a bare name to be found on PATH and the arguments alone.
+func anchorProgram(base string, argv []string) []string {
+	if len(argv) == 0 {
+		return nil
+	}
+
+	out := make([]string, len(argv))
+	copy(out, argv)
+
+	program := out[0]
+	if strings.ContainsRune(program, filepath.Separator) && !filepath.IsAbs(program) {
+		out[0] = filepath.Join(base, program)
+	}
+	return out
 }
 
 // envFilesOf returns the files a secret lives in, accepting both the singular

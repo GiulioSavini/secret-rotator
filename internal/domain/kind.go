@@ -19,6 +19,9 @@ const (
 	KindRedis Kind = "redis"
 	// KindGeneric has no backing service: the value only lives in .env files.
 	KindGeneric Kind = "generic"
+	// KindCommand delegates to programs named in the configuration, for
+	// anything without a built-in rotator.
+	KindCommand Kind = "command"
 )
 
 // kinds is the registry of known kinds and their traits.
@@ -27,6 +30,7 @@ var kinds = map[Kind]kindTraits{
 	KindPostgres: {defaultPort: 5432, needsAdmin: true, needsDatabase: true},
 	KindRedis:    {defaultPort: 6379},
 	KindGeneric:  {},
+	KindCommand:  {},
 }
 
 type kindTraits struct {
@@ -65,6 +69,9 @@ func (k Kind) DefaultPort() int { return kinds[k].defaultPort }
 // outside the .env files. Generic secrets do not, so they are neither verified
 // nor rolled back at the service level.
 func (k Kind) HasBackingService() bool { return k != KindGeneric }
+
+// UsesCommands reports whether the kind is driven by configured programs.
+func (k Kind) UsesCommands() bool { return k == KindCommand }
 
 // RequiresAdminAccount reports whether an administrative account is needed to
 // change the credential.

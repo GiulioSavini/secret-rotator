@@ -31,6 +31,10 @@ type Target struct {
 	// host, MySQL's 'user'@'host'. Empty means '%', matching any host, which
 	// is how Compose stacks normally define their accounts.
 	TargetUserHost string
+	// Command holds the programs that rotate the credential, for KindCommand.
+	// It is part of the target because it is how this kind of service is
+	// reached, the way a host and port are for a database.
+	Command CommandSpec
 }
 
 // DefaultTargetUserHost is the host part used when none is configured.
@@ -80,8 +84,16 @@ func (t Target) Addr(k Kind) string {
 // Only genuinely blocking omissions are errors; questionable but workable
 // setups are returned as warnings for the caller to surface.
 func (t Target) validateFor(k Kind, name SecretName) (warnings []string, err error) {
+	if k.UsesCommands() {
+		return t.Command.validate(name)
+	}
+	if t.Command.IsSet() {
+		warnings = append(warnings, fmt.Sprintf(
+			"secret %q: a command block is configured but the type is %s, so it is ignored "+
+				"(set 'type: command' to use it)", name, k))
+	}
 	if !k.HasBackingService() {
-		return nil, nil
+		return warnings, nil
 	}
 	if t.Host == "" {
 		return nil, fmt.Errorf("%w: secret %q: provider.host is required for type %s",

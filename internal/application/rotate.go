@@ -113,7 +113,7 @@ func (uc *RotateSecret) Execute(ctx context.Context, secret *domain.Secret) erro
 				fmt.Errorf("applying the new credential: %w", err))
 		}
 		rotation.RecordApplied()
-		uc.reporter.Step(domain.StepApplied, fmt.Sprintf("applied to %s", target.Addr(secret.Kind())))
+		uc.reporter.Step(domain.StepApplied, appliedTo(secret, target))
 	}
 
 	if secret.NeedsVerification() {
@@ -152,6 +152,15 @@ func (uc *RotateSecret) Execute(ctx context.Context, secret *domain.Secret) erro
 		uc.reporter.Warn(fmt.Sprintf("rotation succeeded but was not recorded: %v", err))
 	}
 	return nil
+}
+
+// appliedTo describes where a new credential was just applied. A command
+// provider has no address to name, so naming one would be misleading.
+func appliedTo(secret *domain.Secret, target domain.Target) string {
+	if secret.Kind().UsesCommands() {
+		return fmt.Sprintf("applied via %s", shellLike(secret.Target().Command.Apply))
+	}
+	return fmt.Sprintf("applied to %s", target.Addr(secret.Kind()))
 }
 
 // resolveAdminPassword determines the credential used to connect to the

@@ -108,6 +108,7 @@ secrets:
 | `postgres` | `ALTER ROLE` on `target_user` (default: `username`) | `host`, `username`, `database`, and `password` or `password_env` |
 | `redis` | `CONFIG SET requirepass` + `CONFIG REWRITE` | `host` |
 | `generic` | New value in the `.env` files, then restart | — |
+| `command` | Runs programs you name | a `command:` block (see below) |
 
 Common optional keys: `port`, `target_user`, `target_user_host` (MySQL's
 `'user'@'host'`, default `%`), `length`. An unrecognised key under `provider:`
@@ -119,6 +120,66 @@ password. It is looked up in the secret's `.env` file first and in rotator's
 own environment second. Reading the file first is what makes repeated
 rotations work when the admin credential is itself the secret being rotated:
 a long-running daemon keeps the environment it started with.
+
+### The `command` provider
+
+For anything without a built-in provider — MinIO, RabbitMQ, Keycloak, Grafana,
+SSH `authorized_keys`, an HTTP token endpoint — name the programs that do the
+work:
+
+```yaml
+secrets:
+  - name: minio_secret_key
+    type: command
+    env_key: MINIO_SECRET_KEY
+    env_file: .env
+    command:
+      apply:  ["./hooks/rotate-minio.sh", "apply"]
+      verify: ["./hooks/rotate-minio.sh", "verify"]
+      timeout: 60s
+      pass_env: [MINIO_ALIAS]
+    max_age: 90d
+```
+
+Only `apply` is required. Without `verify` the new value is written to the
+`.env` files without being proven to work. Without `restore`, a failed
+rotation is undone by running `apply` again with the previous value, which is
+right whenever applying is idempotent.
+
+Your program receives everything in its environment:
+
+| Variable | Meaning |
+|----------|---------|
+| `ROTATOR_OPERATION` | `apply`, `verify` or `restore` |
+| `ROTATOR_SECRET_NAME`, `ROTATOR_ENV_KEY` | which secret this is |
+| `ROTATOR_NEW_SECRET` | the value to set, or to check |
+| `ROTATOR_PREVIOUS_SECRET` | the value to put back (`restore`) |
+| `ROTATOR_CURRENT_SECRET` | what the service accepts right now (`restore`) |
+| `ROTATOR_HOST`, `ROTATOR_PORT`, `ROTATOR_USERNAME`, `ROTATOR_TARGET_USER`, `ROTATOR_DATABASE` | the target, when configured |
+
+Exit `0` for success, non-zero for failure. There is a working example in
+[`examples/command-provider/`](examples/command-provider/).
+
+**What this provider will and will not do**, because it runs code your config
+file chose:
+
+- **argv lists, never shell strings.** There is no shell, so there is nothing
+  to inject into and no quoting to get wrong. A single string containing
+  spaces is rejected with an explanation rather than handed to `/bin/sh`.
+- **No credential in the arguments.** `/proc/<pid>/cmdline` is world-readable
+  and `ps` would show it to every user on the host, so values travel in the
+  environment, which only the same uid and root can read.
+- **rotator's environment is not inherited.** It holds `ROTATOR_MASTER_KEY`;
+  passing that to every hook would make the passphrase readable by anything
+  the script runs. The child gets `PATH`, `HOME`, the `ROTATOR_*` context, and
+  whatever `pass_env` names explicitly.
+- **Every invocation is bounded**, and the timeout covers the whole process
+  tree, so a script that hangs or leaves a child behind cannot wedge the
+  daemon.
+- **Output is captured and quoted back in errors**, truncated at 2 KB. Do not
+  echo the secret: it would end up in the audit trail.
+- Relative program paths and `working_dir` resolve against `rotator.yml`, the
+  same rule the `.env` paths follow.
 
 ### Containers
 

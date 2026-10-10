@@ -3,6 +3,8 @@ package application
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/GiulioSavini/secret-rotator/internal/domain"
 )
@@ -66,13 +68,27 @@ func (uc *PlanRotation) Build(ctx context.Context, secret *domain.Secret) (*Rota
 	plan.add(domain.StepRead, fmt.Sprintf("read the current %s from %s", secret.EnvKey(), primary))
 	plan.add(domain.StepGenerated, fmt.Sprintf("generate a new %d-byte value", secret.Length().Int()))
 
-	if secret.Kind().HasBackingService() {
+	switch {
+	case secret.Kind().UsesCommands():
+		// A command provider has no host or account to describe, only the
+		// programs it was given.
+		command := secret.Target().Command
+		plan.add(domain.StepApplied, fmt.Sprintf("run %s", shellLike(command.Apply)))
+		if len(command.Verify) > 0 {
+			plan.add(domain.StepVerified, fmt.Sprintf("run %s to prove the new value works",
+				shellLike(command.Verify)))
+		} else {
+			plan.add(domain.StepVerified, "skip verification (no command.verify configured)")
+		}
+
+	case secret.Kind().HasBackingService():
 		target := secret.Target()
 		plan.add(domain.StepApplied, fmt.Sprintf("set the password of %q on %s (%s)",
 			target.EffectiveTargetUser(), target.Addr(secret.Kind()), secret.Kind()))
 		plan.add(domain.StepVerified, fmt.Sprintf("authenticate as %q with the new password",
 			target.EffectiveTargetUser()))
-	} else {
+
+	default:
 		plan.add(domain.StepApplied, "no backing service to update (generic secret)")
 	}
 
@@ -94,4 +110,18 @@ func (uc *PlanRotation) Build(ctx context.Context, secret *domain.Secret) (*Rota
 
 func (p *RotationPlan) add(step domain.Step, description string) {
 	p.Actions = append(p.Actions, PlannedAction{Step: step, Description: description})
+}
+
+// shellLike renders an argv list readably. It is for display only: the
+// command is executed as a list, never through a shell.
+func shellLike(argv []string) string {
+	quoted := make([]string, 0, len(argv))
+	for _, a := range argv {
+		if strings.ContainsAny(a, " \t\"'") {
+			quoted = append(quoted, strconv.Quote(a))
+			continue
+		}
+		quoted = append(quoted, a)
+	}
+	return strings.Join(quoted, " ")
 }

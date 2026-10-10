@@ -52,9 +52,28 @@ type SecretConfig struct {
 	EnvFiles   []string          `koanf:"env_files"`
 	Containers []string          `koanf:"containers"`
 	Provider   map[string]string `koanf:"provider"`
+	Command    CommandConfig     `koanf:"command"`
 	Schedule   string            `koanf:"schedule"`
 	MaxAge     string            `koanf:"max_age"`
 	Length     int               `koanf:"length"`
+}
+
+// CommandConfig mirrors a secret's `command:` block, used by type: command.
+//
+// Commands are lists, not strings: a single string would invite a shell line,
+// and this tool does not run one.
+type CommandConfig struct {
+	Apply   []string `koanf:"apply"`
+	Verify  []string `koanf:"verify"`
+	Restore []string `koanf:"restore"`
+	Timeout string   `koanf:"timeout"`
+	PassEnv []string `koanf:"pass_env"`
+	WorkDir string   `koanf:"working_dir"`
+}
+
+// IsSet reports whether the block carries anything.
+func (c CommandConfig) IsSet() bool {
+	return len(c.Apply) > 0 || len(c.Verify) > 0 || len(c.Restore) > 0
 }
 
 // NotifyConfig mirrors one entry under `notifications:`.
